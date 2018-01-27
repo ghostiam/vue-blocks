@@ -1,8 +1,7 @@
 <template>
   <div class="vue-block" :class="{selected: selected}" :style="style">
     <header :style="headerStyle" @mousedown.stop="headerDown">{{title}}</header>
-    <div>Content</div>
-    <div>Content</div>
+    <div v-for="l in lines">Content {{l}}</div>
   </div>
 </template>
 
@@ -30,7 +29,8 @@
       },
       options: {
         type: Object
-      }
+      },
+      lines: Array
     },
     created () {
       this.mouseX = 0
@@ -38,16 +38,11 @@
 
       this.lastMouseX = 0
       this.lastMouseY = 0
-
-      this.mouseOffX = 0
-      this.mouseOffY = 0
     },
     mounted () {
       document.documentElement.addEventListener('mousemove', this.handleMove, true)
       document.documentElement.addEventListener('mousedown', this.handleDown, true)
       document.documentElement.addEventListener('mouseup', this.handleUp, true)
-
-      console.log(this.style)
     },
     beforeDestroy: function () {
       document.documentElement.removeEventListener('mousemove', this.handleMove, true)
@@ -66,12 +61,12 @@
     },
     methods: {
       handleMove (e) {
-        if (this.dragging) {
-          this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
-          this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
+        this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
+        this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
 
-          let diffX = this.mouseX - this.lastMouseX + this.mouseOffX
-          let diffY = this.mouseY - this.lastMouseY + this.mouseOffY
+        if (this.dragging) {
+          let diffX = this.mouseX - this.lastMouseX
+          let diffY = this.mouseY - this.lastMouseY
 
           this.lastMouseX = this.mouseX
           this.lastMouseY = this.mouseY
@@ -84,9 +79,6 @@
         if (this.$el.contains(target)) {
           this.selected = true
 
-          this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
-          this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
-
           this.lastMouseX = this.mouseX
           this.lastMouseY = this.mouseY
         }
@@ -94,6 +86,8 @@
         if (!this.$el.contains(target)) {
           this.selected = false
         }
+
+        if (e.preventDefault) e.preventDefault()
       },
       headerDown (e) {
         if (e.stopPropagation) e.stopPropagation()
@@ -101,11 +95,16 @@
 
         this.dragging = true
       },
-      handleUp (e) {
+      handleUp () {
         if (this.dragging) {
           this.dragging = false
+          this.save()
         }
       },
+      save () {
+        this.$emit('update')
+      },
+      // public
       moveWithDiff (diffX, diffY) {
         this.left += diffX / this.options.scale
         this.top += diffY / this.options.scale
@@ -120,8 +119,8 @@
           top: this.options.center.y + this.top * this.options.scale + 'px',
           left: this.options.center.x + this.left * this.options.scale + 'px',
           width: this.width + 'px',
-          height: this.height + 'px',
-          transform: 'scale(' + (this.options.scale + '') + ')'
+          transform: 'scale(' + (this.options.scale + '') + ')',
+          transformOrigin: 'top left'
         }
       },
       headerStyle () {

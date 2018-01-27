@@ -9,74 +9,52 @@
   export default {
     props: {
       /** @type {Array} */
-      links: Array,
-      /** @type {Array} */
-      blocks: Array,
+      lines: {
+        type: Array,
+        default () {
+          return []
+        }
+      },
+      color: {
+        type: String,
+        default: 'red'
+      },
+      curve: {
+        type: Boolean,
+        default: false
+      },
       options: Object
     },
     methods: {
-      verticalOffset (y, slot) {
-        let skipHeader = this.options.titleHeight
-        let offsetY = 10
-        return y + skipHeader + offsetY + (offsetY * 2 * slot) * this.options.scale
-      },
       distance (x1, y1, x2, y2) {
         return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
-      },
-      removeLink (id) {
-        console.log('removeLink', id)
       }
     },
     computed: {
-      lines: function () {
-        let lines = []
-
-        for (let link of this.links) {
-          let originBlock = this.blocks.find(block => {
-            return block.id === link.origin_id
-          })
-
-          let targetBlock = this.blocks.find(block => {
-            return block.id === link.target_id
-          })
-
-          if (originBlock.length === 0 || targetBlock.length === 0) {
-            this.removeLink(link.id)
-            continue
-          }
-
-          let x1 = this.options.center.x + originBlock.x * this.options.scale + (this.options.width / 2) + (this.options.width * this.options.scale / 2)
-          let y1 = this.options.center.y + originBlock.y * this.options.scale
-
-          let x2 = this.options.center.x + targetBlock.x * this.options.scale + (this.options.width / 2) - (this.options.width * this.options.scale / 2)
-          let y2 = this.options.center.y + targetBlock.y * this.options.scale
-
-          lines.push({
-            x1: x1,
-            y1: this.verticalOffset(y1, link.origin_slot),
-            x2: x2,
-            y2: this.verticalOffset(y2, link.target_slot)
-          })
-        }
-
-        return lines
-      },
       style () {
         return {
-          stroke: 'rgb(255,0,0)',
+          stroke: this.color,
           strokeWidth: 5 * this.options.scale,
           fill: 'none'
         }
       },
       renderedLines () {
-        return []
+        if (this.curve) {
+          return []
+        }
+        return this.lines
       },
       renderedPathes () {
+        if (!this.curve || !this.lines) {
+          return []
+        }
+
         let pathes = []
         this.lines.forEach(l => {
           let dist = this.distance(l.x1, l.y1, l.x2, l.y2) * 0.25
           pathes.push('M ' + l.x1 + ', ' + l.y1 + ' C ' + (l.x1 + dist) + ', ' + l.y1 + ', ' + (l.x2 - dist) + ', ' + l.y2 + ', ' + l.x2 + ', ' + l.y2 + '')
         })
+
         return pathes
       }
     }

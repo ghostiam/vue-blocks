@@ -1,31 +1,43 @@
 <template>
   <div class="vue-container">
-    <VueLink :links="links" :blocks="blocks" :options="options"/>
-    <VueBlock v-for="block in blocks" :key="block.id" v-bind.sync="block" :options="options"/>
+    <VueLink :lines="lines" :options="optionsForChild"/>
+    <VueBlock v-for="block in blocks" :key="block.id" v-bind.sync="block" :options="optionsForChild" @update="update"/>
   </div>
 </template>
 
 <script>
   import VueBlock from './VueBlock'
   import VueLink from './VueLink'
+  import mouseHelper from '../helpers/mouse'
 
   export default {
     name: 'VueBlockContainer',
     components: {VueBlock, VueLink},
+    props: {
+      data: {
+        type: Object,
+        default: {blocks: [], links: [], container: {}}
+      },
+      options: {
+        type: Object
+      }
+    },
     mounted () {
       document.documentElement.addEventListener('mousemove', this.handleMove, true)
       document.documentElement.addEventListener('mousedown', this.handleDown, true)
       document.documentElement.addEventListener('mouseup', this.handleUp, true)
-      document.documentElement.addEventListener('wheel', this.wheel, true)
+      document.documentElement.addEventListener('wheel', this.handleWheel, true)
 
       this.centerX = this.$el.clientWidth / 2
       this.centerY = this.$el.clientHeight / 2
+
+      this.importData()
     },
     beforeDestroy: function () {
       document.documentElement.removeEventListener('mousemove', this.handleMove, true)
       document.documentElement.removeEventListener('mousedown', this.handleDown, true)
       document.documentElement.removeEventListener('mouseup', this.handleUp, true)
-      document.documentElement.removeEventListener('wheel', this.wheel, true)
+      document.documentElement.removeEventListener('wheel', this.handleWheel, true)
     },
     created () {
       this.mouseX = 0
@@ -33,60 +45,22 @@
 
       this.lastMouseX = 0
       this.lastMouseY = 0
+
+      this.minScale = 0.2
+      this.maxScale = 2
     },
     data () {
       return {
         dragging: false,
         centerX: 0,
         centerY: 0,
-        scale: 0.5,
-        blocks: [
-          {
-            id: 1,
-            x: 20,
-            y: 20,
-            title: 'test 1'
-          },
-          {
-            id: 2,
-            x: 550,
-            y: 20,
-            title: 'test 2'
-          },
-          {
-            id: 3,
-            x: 300,
-            y: 150,
-            title: 'test 3'
-          }
-        ],
-        links: [
-          {
-            id: 1,
-            origin_id: 1,
-            origin_slot: 0,
-            target_id: 2,
-            target_slot: 0
-          },
-          {
-            id: 4,
-            origin_id: 3,
-            origin_slot: 0,
-            target_id: 2,
-            target_slot: 1
-          },
-          {
-            id: 2,
-            origin_id: 1,
-            origin_slot: 0,
-            target_id: 3,
-            target_slot: 0
-          }
-        ]
+        scale: 1,
+        blocks: [],
+        links: []
       }
     },
     computed: {
-      options () {
+      optionsForChild () {
         return {
           width: 200,
           titleHeight: 20,
@@ -96,12 +70,56 @@
             y: this.centerY
           }
         }
+      },
+      // Links calculate
+      lines () {
+        let lines = []
+
+        for (let link of this.links) {
+          let originBlock = this.blocks.find(block => {
+            return block.id === link.origin_id
+          })
+
+          let targetBlock = this.blocks.find(block => {
+            return block.id === link.target_id
+          })
+
+          if (originBlock.length === 0 || targetBlock.length === 0) {
+            console.warn('removeLink', link)
+            this.removeLink(link.id)
+            continue
+          }
+
+          let x1 = this.centerX + originBlock.x * this.scale + (this.optionsForChild.width / 2) + (this.optionsForChild.width * this.scale / 2)
+          let y1 = this.centerY + originBlock.y * this.scale
+
+          let x2 = this.centerX + targetBlock.x * this.scale + (this.optionsForChild.width / 2) - (this.optionsForChild.width * this.scale / 2)
+          let y2 = this.centerY + targetBlock.y * this.scale
+
+          lines.push({
+            x1: x1,
+            y1: y1,
+            x2: x2,
+            y2: y2
+          })
+        }
+
+        return lines
+      },
+      container () {
+        return {
+          centerX: this.centerX,
+          centerY: this.centerY,
+          scale: this.scale
+        }
       }
     },
     methods: {
+      // Events
       handleMove (e) {
-        this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
-        this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
+        let mouse = mouseHelper.getMousePosition(this.$el, e)
+        this.mouseX = mouse.x
+        this.mouseY = mouse.y
 
         if (this.dragging) {
           let diffX = this.mouseX - this.lastMouseX
@@ -119,9 +137,6 @@
         if (target === this.$el || target.matches('svg, svg *')) {
           this.dragging = true
 
-          this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
-          this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
-
           this.lastMouseX = this.mouseX
           this.lastMouseY = this.mouseY
         }
@@ -131,18 +146,53 @@
       handleUp (e) {
         if (this.dragging) {
           this.dragging = false
+          this.update()
         }
       },
-      wheel (e) {
-        let dX = this.mouseX - this.centerX
-        let dY = this.mouseY - this.centerY
-        let deltaScale = Math.pow(1.1, -e.deltaY * 0.1)
-        this.centerX -= dX * (deltaScale - 1)
-        this.centerY -= dY * (deltaScale - 1)
+      handleWheel (e) {
+        if (e.preventDefault) e.preventDefault()
 
-        console.log(e, deltaScale, dX, dY)
-
+        let deltaScale = Math.pow(1.1, e.deltaY * -0.01)
         this.scale *= deltaScale
+
+        if (this.scale < this.minScale) {
+          this.scale = this.minScale
+          return
+        } else if (this.scale > this.maxScale) {
+          this.scale = this.maxScale
+          return
+        }
+
+        let zoomingCenter = {
+          x: this.mouseX,
+          y: this.mouseY
+        }
+
+        let deltaOffsetX = (zoomingCenter.x - this.centerX) * (deltaScale - 1)
+        let deltaOffsetY = (zoomingCenter.y - this.centerY) * (deltaScale - 1)
+
+        this.centerX -= deltaOffsetX
+        this.centerY -= deltaOffsetY
+
+        this.update()
+      },
+      // Processing
+      importData () {
+        this.blocks = this.data.blocks
+        this.links = this.data.links
+
+        let container = this.data.container
+        this.centerX = container.centerX
+        this.centerY = container.centerY
+        this.scale = container.scale
+      },
+      update () {
+        this.$emit('update:data', {blocks: this.blocks, links: this.links, container: this.container})
+      }
+    },
+    watch: {
+      data (newValue, oldValue) {
+        this.importData()
       }
     }
   }
