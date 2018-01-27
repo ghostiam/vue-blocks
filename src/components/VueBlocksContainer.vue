@@ -1,11 +1,18 @@
 <template>
   <div class="vue-container">
-    <VueLink :lines="lines" :options="optionsForChild"/>
-    <VueBlock v-for="block in blocks" :key="block.id" v-bind.sync="block" :options="optionsForChild" @update="update"/>
+    <VueLink :lines="lines" :curve="true" :options="optionsForChild"/>
+    <VueBlock v-for="block in blocks" :key="block.id" v-bind.sync="block" :options="optionsForChild"
+              @update="update"
+              @linkingStart="linkingStart(block, $event)"
+              @linkingStop="linkingStop(block, $event)"
+              @linkingBreak="linkingBreak(block, $event)"
+    />
   </div>
 </template>
 
 <script>
+  import merge from 'deepmerge'
+
   import VueBlock from './VueBlock'
   import VueLink from './VueLink'
   import mouseHelper from '../helpers/mouse'
@@ -47,7 +54,12 @@
       this.lastMouseY = 0
 
       this.minScale = 0.2
-      this.maxScale = 2
+      this.maxScale = 5
+
+      this.linking = false
+      this.linkStartData = null
+
+      this.inputSlotClassName = 'inputSlot'
     },
     data () {
       return {
@@ -56,7 +68,8 @@
         centerY: 0,
         scale: 1,
         blocks: [],
-        links: []
+        links: [],
+        tempLink: null
       }
     },
     computed: {
@@ -65,10 +78,18 @@
           width: 200,
           titleHeight: 20,
           scale: this.scale,
+          inputSlotClassName: this.inputSlotClassName,
           center: {
             x: this.centerX,
             y: this.centerY
           }
+        }
+      },
+      container () {
+        return {
+          centerX: this.centerX,
+          centerY: this.centerY,
+          scale: this.scale
         }
       },
       // Links calculate
@@ -77,24 +98,27 @@
 
         for (let link of this.links) {
           let originBlock = this.blocks.find(block => {
-            return block.id === link.origin_id
+            return block.id === link.originID
           })
 
           let targetBlock = this.blocks.find(block => {
-            return block.id === link.target_id
+            return block.id === link.targetID
           })
 
-          if (originBlock.length === 0 || targetBlock.length === 0) {
+          if (!originBlock || !targetBlock) {
             console.warn('removeLink', link)
-            this.removeLink(link.id)
+            // this.removeLink(link.id)
             continue
           }
 
-          let x1 = this.centerX + originBlock.x * this.scale + (this.optionsForChild.width / 2) + (this.optionsForChild.width * this.scale / 2)
-          let y1 = this.centerY + originBlock.y * this.scale
+          let originLinkPos = this.getConnectionPos(originBlock, link.originSlot, false)
+          let targetLinkPos = this.getConnectionPos(targetBlock, link.targetSlot, true)
 
-          let x2 = this.centerX + targetBlock.x * this.scale + (this.optionsForChild.width / 2) - (this.optionsForChild.width * this.scale / 2)
-          let y2 = this.centerY + targetBlock.y * this.scale
+          let x1 = originLinkPos.x
+          let y1 = originLinkPos.y
+
+          let x2 = targetLinkPos.x
+          let y2 = targetLinkPos.y
 
           lines.push({
             x1: x1,
@@ -104,14 +128,11 @@
           })
         }
 
-        return lines
-      },
-      container () {
-        return {
-          centerX: this.centerX,
-          centerY: this.centerY,
-          scale: this.scale
+        if (this.tempLink) {
+          lines.push(this.tempLink)
         }
+
+        return lines
       }
     },
     methods: {
@@ -131,6 +152,16 @@
           this.centerX += diffX
           this.centerY += diffY
         }
+
+        if (this.linking && this.linkStartData) {
+          let linkStartPos = this.getConnectionPos(this.linkStartData.block, this.linkStartData.slotNumber, false)
+          this.tempLink = {
+            x1: linkStartPos.x,
+            y1: linkStartPos.y,
+            x2: this.mouseX,
+            y2: this.mouseY
+          }
+        }
       },
       handleDown (e) {
         const target = e.target || e.srcElement
@@ -144,9 +175,17 @@
         if (e.preventDefault) e.preventDefault()
       },
       handleUp (e) {
+        const target = e.target || e.srcElement
+
         if (this.dragging) {
           this.dragging = false
           this.update()
+        }
+
+        if (this.$el.contains(target) && (typeof target.className !== 'string' || target.className.indexOf(this.inputSlotClassName) === -1)) {
+          this.linking = false
+          this.tempLink = null
+          this.linkStartData = null
         }
       },
       handleWheel (e) {
@@ -177,9 +216,132 @@
         this.update()
       },
       // Processing
+      getConnectionPos (block, slotNumber, isInput) {
+        if (!block || slotNumber === -1) {
+          return undefined
+        }
+
+        let x = 0
+        let y = 0
+
+        x += block.x
+        y += block.y
+
+        y += this.optionsForChild.titleHeight
+
+        if (isInput && block.inputs.length > slotNumber) {
+        } else if (!isInput && block.outputs.length > slotNumber) {
+          x += this.optionsForChild.width
+        } else {
+          console.error('slot ' + slotNumber + ' not found, is input: ' + isInput, block)
+        }
+
+        // (height / 2 + border + blockBorder + padding)
+        y += (16 / 2 + 1 + 1 + 2)
+        //  + (height * slotNumber)
+        y += (16 * slotNumber)
+
+        x *= this.scale
+        y *= this.scale
+
+        x += this.centerX
+        y += this.centerY
+
+        return {x: x, y: y}
+      },
+      linkingStart (block, slotNumber) {
+        this.linkStartData = {block: block, slotNumber: slotNumber}
+        let linkStartPos = this.getConnectionPos(this.linkStartData.block, this.linkStartData.slotNumber, false)
+        this.tempLink = {
+          x1: linkStartPos.x,
+          y1: linkStartPos.y,
+          x2: this.mouseX,
+          y2: this.mouseY
+        }
+
+        this.linking = true
+      },
+      linkingStop (targetBlock, slotNumber) {
+        if (this.linkStartData && targetBlock && slotNumber > -1) {
+          let maxID = Math.max.apply(Math, this.links.map(function (o) {
+            return o.id
+          }))
+
+          this.links = this.links.filter(value => {
+            return !(value.targetID === targetBlock.id && value.targetSlot === slotNumber)
+          })
+
+          this.links.push({
+            id: maxID + 1,
+            originID: this.linkStartData.block.id,
+            originSlot: this.linkStartData.slotNumber,
+            targetID: targetBlock.id,
+            targetSlot: slotNumber
+          })
+
+          this.update()
+        }
+
+        this.linking = false
+        this.tempLink = null
+        this.linkStartData = null
+      },
+      linkingBreak (targetBlock, slotNumber) {
+        if (targetBlock && slotNumber > -1) {
+          let findLink = this.links.find(value => {
+            return value.targetID === targetBlock.id && value.targetSlot === slotNumber
+          })
+
+          if (findLink) {
+            let findBlock = this.blocks.find(value => {
+              return value.id === findLink.originID
+            })
+
+            this.links = this.links.filter(value => {
+              return !(value.targetID === targetBlock.id && value.targetSlot === slotNumber)
+            })
+
+            this.linkingStart(findBlock, findLink.originSlot)
+
+            this.update()
+          }
+        }
+      },
+      //
+      prepareBlocks (blocks, links) {
+        if (!blocks) {
+          return []
+        }
+
+        let newBlocks = []
+
+        blocks.forEach(block => {
+          let inputs = links.filter(link => {
+            return link.targetID === block.id
+          })
+
+          let outputs = links.filter(link => {
+            return link.originID === block.id
+          })
+
+          block.inputs.forEach((s, index) => {
+            let isLinked = inputs.some(i => i.targetSlot === index)
+            block.inputs[index].active = isLinked
+          })
+
+          block.outputs.forEach((s, index) => {
+            let isLinked = outputs.some(i => i.originSlot === index)
+            block.outputs[index].active = isLinked
+          })
+
+          newBlocks.push(block)
+        })
+
+        return newBlocks
+      },
       importData () {
-        this.blocks = this.data.blocks
-        this.links = this.data.links
+        this.blocks = this.prepareBlocks(merge([], this.data.blocks), this.data.links)
+        this.links = merge([], this.data.links)
 
         let container = this.data.container
         this.centerX = container.centerX

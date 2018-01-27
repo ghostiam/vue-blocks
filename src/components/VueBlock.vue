@@ -1,7 +1,19 @@
 <template>
   <div class="vue-block" :class="{selected: selected}" :style="style">
-    <header :style="headerStyle" @mousedown.stop="headerDown">{{title}}</header>
-    <div v-for="l in lines">Content {{l}}</div>
+    <header :style="headerStyle" @mousedown="headerMouseDown">{{title}}</header>
+    <div class="inputs">
+      <div class="input" v-for="(slot, index) in inputs">
+        <div class="circle inputSlot" :class="{active: slot.active}" @mouseup="slotMouseUp($event, index)"
+             @mousedown="slotBreak($event, index)"></div>
+        {{slot.name}}
+      </div>
+    </div>
+    <div class="outputs">
+      <div class="output" v-for="(slot, index) in outputs">
+        <div class="circle" :class="{active: slot.active}" @mousedown="slotMouseDown($event, index)"></div>
+        {{slot.name}}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -30,7 +42,8 @@
       options: {
         type: Object
       },
-      lines: Array
+      inputs: Array,
+      outputs: Array
     },
     created () {
       this.mouseX = 0
@@ -54,9 +67,9 @@
         top: this.y,
         left: this.x,
         width: this.options.width,
-        height: this.options.height,
         selected: false,
-        dragging: false
+        dragging: false,
+        linking: false
       }
     },
     methods: {
@@ -86,10 +99,8 @@
         if (!this.$el.contains(target)) {
           this.selected = false
         }
-
-        if (e.preventDefault) e.preventDefault()
       },
-      headerDown (e) {
+      headerMouseDown (e) {
         if (e.stopPropagation) e.stopPropagation()
         if (e.preventDefault) e.preventDefault()
 
@@ -100,11 +111,31 @@
           this.dragging = false
           this.save()
         }
+
+        if (this.linking) {
+          this.linking = false
+        }
+      },
+      // Slots
+      slotMouseDown (e, index) {
+        this.linking = true
+        this.$emit('linkingStart', index)
+
+        if (e.preventDefault) e.preventDefault()
+      },
+      slotMouseUp (e, index) {
+        this.$emit('linkingStop', index)
+
+        if (e.preventDefault) e.preventDefault()
+      },
+      slotBreak (e, index) {
+        this.$emit('linkingBreak', index)
+
+        if (e.preventDefault) e.preventDefault()
       },
       save () {
         this.$emit('update')
       },
-      // public
       moveWithDiff (diffX, diffY) {
         this.left += diffX / this.options.scale
         this.top += diffY / this.options.scale
@@ -132,23 +163,117 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
+  @blockBorder: 1px;
+
+  @ioPaddingInner: 2px 0;
+  @ioHeight: 16px;
+  @ioFontSize: 14px;
+
+  @circleBorder: 1px;
+  @circleSize: 8px;
+  @circleMargin: 2px; // left/right
+
+  @circleNewColor: #00FF00;
+  @circleRemoveColor: #FF0000;
+  @circleConnectedColor: #FFFF00;
+
   .vue-block {
     position: absolute;
     box-sizing: border-box;
-    border: 1px solid black;
+    border: @blockBorder solid black;
     background: white;
     z-index: 1;
-  }
+    opacity: 0.9;
 
-  .vue-block.selected {
-    border: 1px solid red;
-    z-index: 2;
-  }
+    &.selected {
+      border: @blockBorder solid red;
+      z-index: 2;
+    }
 
-  .vue-block > header {
-    background: #bfbfbf;
-    text-align: center;
-    cursor: move;
+    > header {
+      background: #bfbfbf;
+      text-align: center;
+      cursor: move;
+    }
+
+    .inputs, .outputs {
+      padding: @ioPaddingInner;
+
+      display: block;
+      width: 50%;
+
+      > * {
+        width: 100%;
+      }
+    }
+
+    .circle {
+      margin-top: @ioHeight / 2 - @circleSize / 2;
+
+      width: @circleSize;
+      height: @circleSize;
+
+      border: 1px solid rgba(0, 0, 0, 0.5);
+      border-radius: 100%;
+
+      cursor: pointer;
+      &.active {
+        background: @circleConnectedColor;
+      }
+    }
+
+    .inputs {
+      float: left;
+      text-align: left;
+
+      margin-left: -(@circleSize/2 + @blockBorder);
+    }
+
+    .input, .output {
+      height: @ioHeight;
+      overflow: hidden;
+      font-size: @ioFontSize;
+
+      &:last-child {
+      }
+    }
+
+    .input {
+      float: left;
+
+      .circle {
+        float: left;
+        margin-right: @circleMargin;
+
+        &:hover {
+          background: @circleNewColor;
+
+          &.active {
+            background: @circleRemoveColor;
+          }
+        }
+      }
+    }
+
+    .outputs {
+      float: right;
+      text-align: right;
+
+      margin-right: -(@circleSize/2 + @blockBorder);
+    }
+
+    .output {
+      float: right;
+
+      .circle {
+        float: right;
+        margin-left: @circleMargin;
+
+        &:hover {
+          background: @circleNewColor;
+        }
+      }
+    }
   }
 </style>
