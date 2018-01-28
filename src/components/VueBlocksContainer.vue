@@ -89,7 +89,7 @@
     computed: {
       optionsForChild () {
         return {
-          width: 150,
+          width: 200,
           titleHeight: 20,
           scale: this.scale,
           inputSlotClassName: this.inputSlotClassName,
@@ -120,8 +120,14 @@
           })
 
           if (!originBlock || !targetBlock) {
-            console.warn('removeLink', link)
-            // this.removeLink(link.id)
+            console.warn('Remove invalid link', link)
+            this.removeLink(link.id)
+            continue
+          }
+
+          if (originBlock.id === targetBlock.id) {
+            console.warn('Loop detected, remove link', link)
+            this.removeLink(link.id)
             continue
           }
 
@@ -285,6 +291,7 @@
 
         return {x: x, y: y}
       },
+      // Linking
       linkingStart (block, slotNumber) {
         this.linkStartData = {block: block, slotNumber: slotNumber}
         let linkStartPos = this.getConnectionPos(this.linkStartData.block, this.linkStartData.slotNumber, false)
@@ -299,13 +306,13 @@
       },
       linkingStop (targetBlock, slotNumber) {
         if (this.linkStartData && targetBlock && slotNumber > -1) {
-          let maxID = Math.max.apply(Math, this.links.map(function (o) {
-            return o.id
-          }))
-
           this.links = this.links.filter(value => {
             return !(value.targetID === targetBlock.id && value.targetSlot === slotNumber)
           })
+
+          let maxID = Math.max(0, ...this.links.map(function (o) {
+            return o.id
+          }))
 
           this.links.push({
             id: maxID + 1,
@@ -343,6 +350,51 @@
           }
         }
       },
+      removeLink (linkID) {
+        this.links = this.links.filter(value => {
+          return !(value.id === linkID)
+        })
+        this.updateScene()
+      },
+      // Blocks
+      addBlock (node, position = {x: 0, y: 0}) {
+        let maxID = Math.max(0, ...this.blocks.map(function (o) {
+          return o.id
+        }))
+
+        let inputs = []
+        let outputs = []
+        let properties = []
+
+        node.fields.forEach(field => {
+          if (field.attr === 'input') {
+            inputs.push({
+              name: field.name
+            })
+          } else if (field.attr === 'output') {
+            outputs.push({
+              name: field.name
+            })
+          } else if (field.attr === 'property') {
+            properties.push({
+              name: field.name,
+              value: field.defaultValue
+            })
+          }
+        })
+
+        this.blocks.push({
+          id: maxID + 1,
+          x: position.x,
+          y: position.y,
+          title: node.name,
+          values: {},
+          inputs: inputs,
+          outputs: outputs
+        })
+
+        this.updateScene()
+      },
       //
       prepareBlocks (blocks, links) {
         if (!blocks) {
@@ -379,6 +431,11 @@
         if (this.blocksContent) {
           this.nodes = merge([], this.blocksContent)
         }
+
+        // For demo
+        this.nodes.forEach(node => this.addBlock(node))
+        this.nodes.forEach(node => this.addBlock(node))
+        this.nodes.forEach(node => this.addBlock(node))
       },
       importScene () {
         let scene = merge(this.defaultScene, this.scene)

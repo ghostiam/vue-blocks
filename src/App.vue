@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <VueBlocksContainer :blocks="blocks" :scene.sync="scene" class="container"/>
+    <VueBlocksContainer :blocksContent="blocks" :scene.sync="scene" class="container"/>
 
   </div>
 </template>
@@ -24,25 +24,25 @@
               {
                 name: 'Animation',
                 type: 'animation',
-                attrs: 'property',
+                attr: 'property',
                 hide: false
               },
               {
                 name: 'Play',
                 type: 'event',
-                attrs: 'input',
+                attr: 'input',
                 hide: false
               },
               {
                 name: 'Stop',
                 type: 'event',
-                attrs: 'input',
+                attr: 'input',
                 hide: true
               },
               {
                 name: 'onEnd',
                 type: 'event',
-                attrs: 'output',
+                attr: 'output',
                 hide: false
               }
             ]
@@ -55,12 +55,12 @@
               {
                 name: 'Message',
                 type: 'string',
-                attrs: 'property'
+                attr: 'property'
               },
               {
                 name: 'onMessage',
                 type: 'event',
-                attrs: 'output'
+                attr: 'output'
               }
             ]
           },
@@ -72,18 +72,18 @@
               {
                 name: 'Delay(s)',
                 type: 'number',
-                attrs: 'property',
+                attr: 'property',
                 defaultValue: 1.0
               },
               {
                 name: 'input',
                 type: 'event',
-                attrs: 'input'
+                attr: 'input'
               },
               {
                 name: 'output',
                 type: 'event',
-                attrs: 'output'
+                attr: 'output'
               }
             ]
           }
