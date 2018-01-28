@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <VueBlocksContainer :data.sync="blocksData" class="container"/>
+    <VueBlocksContainer :blocks="blocks" :scene.sync="scene" class="container"/>
 
   </div>
 </template>
@@ -15,7 +15,81 @@
     },
     data: function () {
       return {
-        blocksData: {
+        blocks: [
+          {
+            name: 'Animation',
+            family: 'Animations',
+            description: 'Control your animation',
+            fields: [
+              {
+                name: 'Animation',
+                type: 'animation',
+                attrs: 'property',
+                hide: false
+              },
+              {
+                name: 'Play',
+                type: 'event',
+                attrs: 'input',
+                hide: false
+              },
+              {
+                name: 'Stop',
+                type: 'event',
+                attrs: 'input',
+                hide: true
+              },
+              {
+                name: 'onEnd',
+                type: 'event',
+                attrs: 'output',
+                hide: false
+              }
+            ]
+          },
+          {
+            name: 'Chat message',
+            family: 'Events',
+            description: '',
+            fields: [
+              {
+                name: 'Message',
+                type: 'string',
+                attrs: 'property'
+              },
+              {
+                name: 'onMessage',
+                type: 'event',
+                attrs: 'output'
+              }
+            ]
+          },
+          {
+            name: 'Delay',
+            family: 'Time',
+            description: '',
+            fields: [
+              {
+                name: 'Delay(s)',
+                type: 'number',
+                attrs: 'property',
+                defaultValue: 1.0
+              },
+              {
+                name: 'input',
+                type: 'event',
+                attrs: 'input'
+              },
+              {
+                name: 'output',
+                type: 'event',
+                attrs: 'output'
+              }
+            ]
+          }
+        ],
+        scene: {}
+        /* scene: {
           blocks: [
             {
               id: 1,
@@ -306,12 +380,15 @@
             centerY: 206.54603325466186,
             scale: 1
           }
-        }
+        } */
       }
     },
     watch: {
-      blocksData (newValue, oldValue) {
-        console.log(JSON.stringify(newValue))
+      blocks (newValue, oldValue) {
+        console.log('blocks', JSON.stringify(newValue))
+      },
+      scene (newValue, oldValue) {
+        console.log('scene', JSON.stringify(newValue))
       }
     }
   }

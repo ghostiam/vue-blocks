@@ -1,8 +1,8 @@
 <template>
   <div class="vue-container">
-    <VueLink :lines="lines" :curve="true" :options="optionsForChild"/>
+    <VueLink :lines="lines"/>
     <VueBlock v-for="block in blocks" :key="block.id" v-bind.sync="block" :options="optionsForChild"
-              @update="update"
+              @update="updateScene"
               @linkingStart="linkingStart(block, $event)"
               @linkingStop="linkingStop(block, $event)"
               @linkingBreak="linkingBreak(block, $event)"
@@ -21,7 +21,13 @@
     name: 'VueBlockContainer',
     components: {VueBlock, VueLink},
     props: {
-      data: {
+      blocksContent: {
+        type: Array,
+        default () {
+          return []
+        }
+      },
+      scene: {
         type: Object,
         default: {blocks: [], links: [], container: {}}
       },
@@ -38,9 +44,10 @@
       this.centerX = this.$el.clientWidth / 2
       this.centerY = this.$el.clientHeight / 2
 
-      this.importData()
+      this.importBlocksContent()
+      this.importScene()
     },
-    beforeDestroy: function () {
+    beforeDestroy () {
       document.documentElement.removeEventListener('mousemove', this.handleMove, true)
       document.documentElement.removeEventListener('mousedown', this.handleDown, true)
       document.documentElement.removeEventListener('mouseup', this.handleUp, true)
@@ -60,6 +67,12 @@
       this.linkStartData = null
 
       this.inputSlotClassName = 'inputSlot'
+
+      this.defaultScene = {
+        blocks: [],
+        links: [],
+        container: {}
+      }
     },
     data () {
       return {
@@ -67,6 +80,7 @@
         centerX: 0,
         centerY: 0,
         scale: 1,
+        nodes: [],
         blocks: [],
         links: [],
         tempLink: null
@@ -75,7 +89,7 @@
     computed: {
       optionsForChild () {
         return {
-          width: 200,
+          width: 150,
           titleHeight: 20,
           scale: this.scale,
           inputSlotClassName: this.inputSlotClassName,
@@ -124,11 +138,28 @@
             x1: x1,
             y1: y1,
             x2: x2,
-            y2: y2
+            y2: y2,
+            style: {
+              stroke: '#F85',
+              strokeWidth: 4 * this.scale,
+              fill: 'none'
+            },
+            outlineStyle: {
+              stroke: '#666',
+              strokeWidth: 6 * this.scale,
+              strokeOpacity: 0.6,
+              fill: 'none'
+            }
           })
         }
 
         if (this.tempLink) {
+          this.tempLink.style = {
+            stroke: '#8f8f8f',
+            strokeWidth: 4 * this.scale,
+            fill: 'none'
+          }
+
           lines.push(this.tempLink)
         }
 
@@ -137,6 +168,7 @@
     },
     methods: {
       // Events
+      /** @param e {MouseEvent} */
       handleMove (e) {
         let mouse = mouseHelper.getMousePosition(this.$el, e)
         this.mouseX = mouse.x
@@ -168,6 +200,10 @@
         if (target === this.$el || target.matches('svg, svg *')) {
           this.dragging = true
 
+          let mouse = mouseHelper.getMousePosition(this.$el, e)
+          this.mouseX = mouse.x
+          this.mouseY = mouse.y
+
           this.lastMouseX = this.mouseX
           this.lastMouseY = this.mouseY
         }
@@ -179,7 +215,7 @@
 
         if (this.dragging) {
           this.dragging = false
-          this.update()
+          this.updateScene()
         }
 
         if (this.$el.contains(target) && (typeof target.className !== 'string' || target.className.indexOf(this.inputSlotClassName) === -1)) {
@@ -213,7 +249,7 @@
         this.centerX -= deltaOffsetX
         this.centerY -= deltaOffsetY
 
-        this.update()
+        this.updateScene()
       },
       // Processing
       getConnectionPos (block, slotNumber, isInput) {
@@ -279,7 +315,7 @@
             targetSlot: slotNumber
           })
 
-          this.update()
+          this.updateScene()
         }
 
         this.linking = false
@@ -303,7 +339,7 @@
 
             this.linkingStart(findBlock, findLink.originSlot)
 
-            this.update()
+            this.updateScene()
           }
         }
       },
@@ -339,22 +375,42 @@
 
         return newBlocks
       },
-      importData () {
-        this.blocks = this.prepareBlocks(merge([], this.data.blocks), this.data.links)
-        this.links = merge([], this.data.links)
-
-        let container = this.data.container
-        this.centerX = container.centerX
-        this.centerY = container.centerY
-        this.scale = container.scale
+      importBlocksContent () {
+        if (this.blocksContent) {
+          this.nodes = merge([], this.blocksContent)
+        }
       },
-      update () {
-        this.$emit('update:data', {blocks: this.blocks, links: this.links, container: this.container})
+      importScene () {
+        let scene = merge(this.defaultScene, this.scene)
+
+        this.blocks = this.prepareBlocks(merge([], scene.blocks), scene.links)
+        this.links = merge([], scene.links)
+
+        let container = scene.container
+        if (container.centerX) {
+          this.centerX = container.centerX
+        }
+        if (container.centerY) {
+          this.centerY = container.centerY
+        }
+        if (container.scale) {
+          this.scale = container.scale
+        }
+      },
+      updateScene () {
+        this.$emit('update:scene', {
+          blocks: this.blocks,
+          links: this.links,
+          container: this.container
+        })
       }
     },
     watch: {
-      data (newValue, oldValue) {
-        this.importData()
+      blocksContent (newValue, oldValue) {
+        this.importBlocksContent()
+      },
+      scene (newValue, oldValue) {
+        this.importScene()
       }
     }
   }

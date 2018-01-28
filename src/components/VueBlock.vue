@@ -1,16 +1,18 @@
 <template>
   <div class="vue-block" :class="{selected: selected}" :style="style">
-    <header :style="headerStyle" @mousedown="headerMouseDown">{{title}}</header>
+    <header :style="headerStyle">{{title}}</header>
     <div class="inputs">
       <div class="input" v-for="(slot, index) in inputs">
-        <div class="circle inputSlot" :class="{active: slot.active}" @mouseup="slotMouseUp($event, index)"
+        <div class="circle inputSlot" :class="{active: slot.active}"
+             @mouseup="slotMouseUp($event, index)"
              @mousedown="slotBreak($event, index)"></div>
         {{slot.name}}
       </div>
     </div>
     <div class="outputs">
       <div class="output" v-for="(slot, index) in outputs">
-        <div class="circle" :class="{active: slot.active}" @mousedown="slotMouseDown($event, index)"></div>
+        <div class="circle" :class="{active: slot.active}"
+             @mousedown="slotMouseDown($event, index)"></div>
         {{slot.name}}
       </div>
     </div>
@@ -77,7 +79,7 @@
         this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
         this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
 
-        if (this.dragging) {
+        if (this.dragging && !this.linking) {
           let diffX = this.mouseX - this.lastMouseX
           let diffY = this.mouseY - this.lastMouseY
 
@@ -91,6 +93,10 @@
         const target = e.target || e.srcElement
         if (this.$el.contains(target)) {
           this.selected = true
+          this.dragging = true
+
+          this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
+          this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
 
           this.lastMouseX = this.mouseX
           this.lastMouseY = this.mouseY
@@ -99,12 +105,6 @@
         if (!this.$el.contains(target)) {
           this.selected = false
         }
-      },
-      headerMouseDown (e) {
-        if (e.stopPropagation) e.stopPropagation()
-        if (e.preventDefault) e.preventDefault()
-
-        this.dragging = true
       },
       handleUp () {
         if (this.dragging) {
@@ -119,18 +119,18 @@
       // Slots
       slotMouseDown (e, index) {
         this.linking = true
-        this.$emit('linkingStart', index)
 
+        this.$emit('linkingStart', index)
         if (e.preventDefault) e.preventDefault()
       },
       slotMouseUp (e, index) {
         this.$emit('linkingStop', index)
-
         if (e.preventDefault) e.preventDefault()
       },
       slotBreak (e, index) {
-        this.$emit('linkingBreak', index)
+        this.linking = true
 
+        this.$emit('linkingBreak', index)
         if (e.preventDefault) e.preventDefault()
       },
       save () {
@@ -186,6 +186,8 @@
     z-index: 1;
     opacity: 0.9;
 
+    cursor: move;
+
     &.selected {
       border: @blockBorder solid red;
       z-index: 2;
@@ -194,7 +196,6 @@
     > header {
       background: #bfbfbf;
       text-align: center;
-      cursor: move;
     }
 
     .inputs, .outputs {
@@ -217,7 +218,7 @@
       border: 1px solid rgba(0, 0, 0, 0.5);
       border-radius: 100%;
 
-      cursor: pointer;
+      cursor: crosshair;
       &.active {
         background: @circleConnectedColor;
       }
