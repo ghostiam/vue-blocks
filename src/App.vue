@@ -4,7 +4,11 @@
                         @blockDeselect="deselectBlock" class="container"/>
     <VueBlockProperty :property="selectedBlockProperty" @save="saveProperty"/>
     <select name="type" v-model="selectedType">
-      <option v-for="block in blocks" :value="block.name">{{block.title || block.name}}</option>
+      <template v-for="type in selectBlocksType">
+        <optgroup :label="type">
+          <option v-for="block in filteredBlocks(type)" :value="block.name">{{block.title || block.name}}</option>
+        </optgroup>
+      </template>
     </select>
     <button @click.stop="addBlock">Add</button>
   </div>
@@ -26,9 +30,50 @@
       return {
         blocks: [
           {
-            name: 'Animation',
+            name: 'text',
+            title: 'Text',
             family: 'Animations',
-            description: 'Control your animation',
+            description: 'Show text',
+            fields: [
+              {
+                name: 'text',
+                label: 'Text',
+                type: 'string',
+                attr: 'property'
+              },
+              {
+                name: 'delay',
+                label: 'Delay (s)',
+                type: 'number',
+                attr: 'property'
+              },
+              {
+                name: 'Show',
+                type: 'event',
+                attr: 'input'
+              },
+              {
+                name: 'Hide',
+                type: 'event',
+                attr: 'input'
+              },
+              {
+                name: 'onShow',
+                type: 'event',
+                attr: 'output'
+              },
+              {
+                name: 'onHide',
+                type: 'event',
+                attr: 'output'
+              }
+            ]
+          },
+          {
+            name: 'animation',
+            title: 'Animation',
+            family: 'Animations',
+            description: 'Show animation',
             fields: [
               {
                 name: 'animation',
@@ -114,29 +159,47 @@
                 attr: 'output'
               }
             ]
+          },
+          {
+            name: 'splitter',
+            title: 'Splitter',
+            family: 'Helpers',
+            description: 'Press shortcut for call event',
+            fields: [
+              {
+                name: 'input',
+                type: 'event',
+                attr: 'input'
+              },
+              {
+                name: 'output',
+                type: 'event',
+                attr: 'output'
+              },
+              {
+                name: 'output',
+                type: 'event',
+                attr: 'output'
+              },
+              {
+                name: 'output',
+                type: 'event',
+                attr: 'output'
+              },
+              {
+                name: 'output',
+                type: 'event',
+                attr: 'output'
+              }
+            ]
           }
         ],
         scene: {
           blocks: [
             {
-              id: 1,
-              x: 315,
-              y: 14,
-              name: 'Animation',
-              title: 'Animation',
-              values: {
-                property: {
-                  animation: {
-                    label: 'Animation',
-                    type: 'animation'
-                  }
-                }
-              }
-            },
-            {
               id: 2,
-              x: -742,
-              y: 35,
+              x: -700,
+              y: -69,
               name: 'Chat message',
               title: 'Chat message',
               values: {
@@ -149,9 +212,39 @@
               }
             },
             {
-              id: 3,
-              x: -109,
-              y: 94,
+              id: 4,
+              x: -157,
+              y: -68.5,
+              name: 'text',
+              title: 'Text',
+              values: {
+                property: {
+                  text: {
+                    label: 'Text',
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            {
+              id: 5,
+              x: 136,
+              y: -48.5,
+              name: 'text',
+              title: 'Text',
+              values: {
+                property: {
+                  text: {
+                    label: 'Text',
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            {
+              id: 6,
+              x: -440,
+              y: -15.5,
               name: 'delay',
               title: 'Delay',
               values: {
@@ -159,47 +252,182 @@
                   delay: {
                     label: 'Delay (s)',
                     type: 'number',
-                    value: 9999
+                    value: 1
                   }
                 }
               }
             },
             {
-              id: 4,
-              x: -284,
-              y: -59,
-              name: 'Animation',
+              id: 7,
+              x: -694,
+              y: 60.5,
+              name: 'shortcuts',
+              title: 'Shortcuts',
+              values: {
+                property: {
+                  keys: {
+                    label: 'Activation keys',
+                    type: 'keys'
+                  }
+                }
+              }
+            },
+            {
+              id: 8,
+              x: -163,
+              y: 59.5,
+              name: 'text',
+              title: 'Text',
+              values: {
+                property: {
+                  text: {
+                    label: 'Text',
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            {
+              id: 9,
+              x: -429,
+              y: 125.5,
+              name: 'delay',
+              title: 'Delay',
+              values: {
+                property: {
+                  delay: {
+                    label: 'Delay (s)',
+                    type: 'number',
+                    value: 1
+                  }
+                }
+              }
+            },
+            {
+              id: 10,
+              x: 126,
+              y: 127.5,
+              name: 'text',
+              title: 'Text',
+              values: {
+                property: {
+                  text: {
+                    label: 'Text',
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            {
+              id: 11,
+              x: -856,
+              y: 252.5,
+              name: 'shortcuts',
+              title: 'Shortcuts',
+              values: {
+                property: {
+                  keys: {
+                    label: 'Activation keys',
+                    type: 'keys'
+                  }
+                }
+              }
+            },
+            {
+              id: 12,
+              x: -616,
+              y: 319.5,
+              name: 'delay',
+              title: 'Delay',
+              values: {
+                property: {
+                  delay: {
+                    label: 'Delay (s)',
+                    type: 'number',
+                    value: 1
+                  }
+                }
+              }
+            },
+            {
+              id: 13,
+              x: -381,
+              y: 252.5,
+              name: 'text',
+              title: 'Text',
+              values: {
+                property: {
+                  text: {
+                    label: 'Text',
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            {
+              id: 14,
+              x: 166,
+              y: 266.5,
+              name: 'text',
+              title: 'Text',
+              values: {
+                property: {
+                  text: {
+                    label: 'Text',
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            {
+              id: 15,
+              x: -149,
+              y: 269.5,
+              name: 'delay',
+              title: 'Delay',
+              values: {
+                property: {
+                  delay: {
+                    label: 'Delay (s)',
+                    type: 'number',
+                    value: 1
+                  }
+                }
+              }
+            },
+            {
+              id: 16,
+              x: 413,
+              y: 267.5,
+              name: 'animation',
               title: 'Animation',
               values: {
                 property: {
                   animation: {
                     label: 'Animation',
-                    type: 'animation',
-                    value: 1234
-                  },
-                  test: {
-                    label: 'test',
-                    type: 'string'
+                    type: 'animation'
+                  }
+                }
+              }
+            },
+            {
+              id: 17,
+              x: 13,
+              y: 380.5,
+              name: 'delay',
+              title: 'Delay',
+              values: {
+                property: {
+                  delay: {
+                    label: 'Delay (s)',
+                    type: 'number',
+                    value: 1
                   }
                 }
               }
             }
           ],
           links: [
-            {
-              id: 1,
-              originID: 2,
-              originSlot: 0,
-              targetID: 3,
-              targetSlot: 0
-            },
-            {
-              id: 2,
-              originID: 3,
-              originSlot: 0,
-              targetID: 1,
-              targetSlot: 1
-            },
             {
               id: 3,
               originID: 2,
@@ -208,16 +436,121 @@
               targetSlot: 0
             },
             {
-              id: 4,
-              originID: 4,
+              id: 6,
+              originID: 7,
               originSlot: 0,
-              targetID: 1,
+              targetID: 8,
               targetSlot: 0
+            },
+            {
+              id: 7,
+              originID: 7,
+              originSlot: 0,
+              targetID: 9,
+              targetSlot: 0
+            },
+            {
+              id: 8,
+              originID: 9,
+              originSlot: 0,
+              targetID: 10,
+              targetSlot: 0
+            },
+            {
+              id: 9,
+              originID: 9,
+              originSlot: 0,
+              targetID: 8,
+              targetSlot: 1
+            },
+            {
+              id: 10,
+              originID: 2,
+              originSlot: 0,
+              targetID: 6,
+              targetSlot: 0
+            },
+            {
+              id: 11,
+              originID: 6,
+              originSlot: 0,
+              targetID: 4,
+              targetSlot: 1
+            },
+            {
+              id: 12,
+              originID: 4,
+              originSlot: 1,
+              targetID: 5,
+              targetSlot: 0
+            },
+            {
+              id: 13,
+              originID: 11,
+              originSlot: 0,
+              targetID: 13,
+              targetSlot: 0
+            },
+            {
+              id: 14,
+              originID: 11,
+              originSlot: 0,
+              targetID: 12,
+              targetSlot: 0
+            },
+            {
+              id: 15,
+              originID: 12,
+              originSlot: 0,
+              targetID: 13,
+              targetSlot: 1
+            },
+            {
+              id: 16,
+              originID: 13,
+              originSlot: 1,
+              targetID: 15,
+              targetSlot: 0
+            },
+            {
+              id: 17,
+              originID: 15,
+              originSlot: 0,
+              targetID: 14,
+              targetSlot: 0
+            },
+            {
+              id: 18,
+              originID: 14,
+              originSlot: 0,
+              targetID: 16,
+              targetSlot: 0
+            },
+            {
+              id: 19,
+              originID: 14,
+              originSlot: 1,
+              targetID: 16,
+              targetSlot: 1
+            },
+            {
+              id: 20,
+              originID: 15,
+              originSlot: 0,
+              targetID: 17,
+              targetSlot: 0
+            },
+            {
+              id: 21,
+              originID: 17,
+              originSlot: 0,
+              targetID: 14,
+              targetSlot: 1
             }
           ],
           container: {
-            centerX: 995,
-            centerY: 135,
+            centerX: 1042,
+            centerY: 140,
             scale: 1
           }
         },
@@ -524,6 +857,13 @@
         }
 
         return this.selectedBlock.values.property
+      },
+      selectBlocksType () {
+        return this.blocks.map(b => {
+          return b.family
+        }).filter((value, index, array) => {
+          return array.indexOf(value) === index
+        })
       }
     },
     methods: {
@@ -533,6 +873,11 @@
       },
       deselectBlock (block) {
         console.log('deselect', block)
+      },
+      filteredBlocks (type) {
+        return this.blocks.filter(value => {
+          return value.family === type
+        })
       },
       addBlock () {
         console.log(this.selectedType)

@@ -103,7 +103,7 @@
         this.lastMouseY = this.mouseY
 
         const target = e.target || e.srcElement
-        if (this.$el.contains(target)) {
+        if (this.$el.contains(target) && e.which === 1) {
           this.dragging = true
           this.selected = true
 
@@ -220,6 +220,8 @@
         color: red;
         cursor: pointer;
         float: right;
+        position: absolute;
+        right: 5px;
       }
     }
 

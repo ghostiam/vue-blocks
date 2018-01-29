@@ -133,13 +133,13 @@
           })
 
           if (!originBlock || !targetBlock) {
-            console.warn('Remove invalid link', link)
+            console.log('Remove invalid link', link)
             this.removeLink(link.id)
             continue
           }
 
           if (originBlock.id === targetBlock.id) {
-            console.warn('Loop detected, remove link', link)
+            console.log('Loop detected, remove link', link)
             this.removeLink(link.id)
             continue
           }
@@ -218,7 +218,7 @@
       },
       handleDown (e) {
         const target = e.target || e.srcElement
-        if (target === this.$el || target.matches('svg, svg *')) {
+        if ((target === this.$el || target.matches('svg, svg *')) && e.which === 1) {
           this.dragging = true
 
           let mouse = mouseHelper.getMousePosition(this.$el, e)
@@ -392,9 +392,11 @@
           return
         }
         let block = this.createBlock(node, maxID + 1)
-        block.x = -this.centerX + this.$el.clientWidth / 2
-        block.y = -this.centerY + this.$el.clientHeight / 2
+        block.x = (this.mouseX - this.centerX) / this.scale // -this.centerX + this.$el.clientWidth / 2
+        block.y = (this.mouseY - this.centerY) / this.scale // -this.centerY + this.$el.clientHeight / 2
         this.blocks.push(block)
+
+        this.updateScene()
       },
       createBlock (node, id) {
         let inputs = []
