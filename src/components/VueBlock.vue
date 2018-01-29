@@ -6,14 +6,14 @@
         <div class="circle inputSlot" :class="{active: slot.active}"
              @mouseup="slotMouseUp($event, index)"
              @mousedown="slotBreak($event, index)"></div>
-        {{slot.name}}
+        {{slot.label}}
       </div>
     </div>
     <div class="outputs">
       <div class="output" v-for="(slot, index) in outputs">
         <div class="circle" :class="{active: slot.active}"
              @mousedown="slotMouseDown($event, index)"></div>
-        {{slot.name}}
+        {{slot.label}}
       </div>
     </div>
   </div>

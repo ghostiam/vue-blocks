@@ -1,11 +1,14 @@
 <template>
   <div id="app">
-    <VueBlocksContainer :blocksContent="blocks" :scene.sync="scene" @blockSelect="selectBlock" @blockDeselect="deselectBlock" class="container"/>
-    <VueBlockProperty :block="selectedBlock"/>
+    <VueBlocksContainer :blocksContent="blocks" :scene.sync="scene" @blockSelect="selectBlock"
+                        @blockDeselect="deselectBlock" class="container"/>
+    <VueBlockProperty :property="selectedBlockProperty" @save="saveProperty"/>
   </div>
 </template>
 
 <script>
+  import merge from 'deepmerge'
+
   import VueBlocksContainer from './components/VueBlocksContainer'
   import VueBlockProperty from './components/VueBlockProperty'
 
@@ -19,12 +22,13 @@
       return {
         blocks: [
           {
-            name: 'animation',
+            name: 'Animation',
             family: 'Animations',
             description: 'Control your animation',
             fields: [
               {
-                name: 'Animation',
+                name: 'animation',
+                label: 'Animation',
                 type: 'animation',
                 attr: 'property'
               },
@@ -88,7 +92,111 @@
             ]
           }
         ],
-        scene: {},
+        scene: {
+          blocks: [
+            {
+              id: 1,
+              x: 315,
+              y: 14,
+              name: 'Animation',
+              title: 'Animation',
+              values: {
+                property: {
+                  animation: {
+                    label: 'Animation',
+                    type: 'animation'
+                  }
+                }
+              }
+            },
+            {
+              id: 2,
+              x: -742,
+              y: 35,
+              name: 'Chat message',
+              title: 'Chat message',
+              values: {
+                property: [
+                  {
+                    name: 'message',
+                    type: 'string'
+                  }
+                ]
+              }
+            },
+            {
+              id: 3,
+              x: -109,
+              y: 94,
+              name: 'Delay',
+              title: 'Delay',
+              values: {
+                property: {
+                  delay: {
+                    label: 'Delay (s)',
+                    type: 'number',
+                    value: 9999
+                  }
+                }
+              }
+            },
+            {
+              id: 4,
+              x: -284,
+              y: -59,
+              name: 'Animation',
+              title: 'Animation',
+              values: {
+                property: {
+                  animation: {
+                    label: 'Animation',
+                    type: 'animation',
+                    value: 1234
+                  },
+                  test: {
+                    label: 'test',
+                    type: 'string'
+                  }
+                }
+              }
+            }
+          ],
+          links: [
+            {
+              id: 1,
+              originID: 2,
+              originSlot: 0,
+              targetID: 3,
+              targetSlot: 0
+            },
+            {
+              id: 2,
+              originID: 3,
+              originSlot: 0,
+              targetID: 1,
+              targetSlot: 1
+            },
+            {
+              id: 3,
+              originID: 2,
+              originSlot: 0,
+              targetID: 4,
+              targetSlot: 0
+            },
+            {
+              id: 4,
+              originID: 4,
+              originSlot: 0,
+              targetID: 1,
+              targetSlot: 0
+            }
+          ],
+          container: {
+            centerX: 995,
+            centerY: 135,
+            scale: 1
+          }
+        },
         /* scene: {
           blocks: [
             {
@@ -384,6 +492,15 @@
         selectedBlock: null
       }
     },
+    computed: {
+      selectedBlockProperty () {
+        if (!this.selectedBlock || !this.selectedBlock.values || !this.selectedBlock.values.property) {
+          return null
+        }
+
+        return this.selectedBlock.values.property
+      }
+    },
     methods: {
       selectBlock (block) {
         console.log('select', block)
@@ -391,6 +508,17 @@
       },
       deselectBlock (block) {
         console.log('deselect', block)
+      },
+      saveProperty (val) {
+        console.log(val)
+
+        let scene = this.scene
+        let block = scene.blocks.find(b => {
+          return b.id === this.selectedBlock.id
+        })
+        block.values.property = val
+
+        this.scene = merge({}, scene)
       }
     },
     watch: {

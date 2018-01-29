@@ -95,7 +95,6 @@
         links: [],
         //
         tempLink: null,
-        lastSelectedBlock: null,
         hasDragged: false
       }
     },
@@ -379,10 +378,12 @@
         this.updateScene()
       },
       // Blocks
-      createBlock (node, position = {x: 0, y: 0}) {
+      createBlock (node, id) {
+        /*
         let maxID = Math.max(0, ...this.blocks.map(function (o) {
           return o.id
         }))
+        */
 
         let inputs = []
         let outputs = []
@@ -401,38 +402,64 @@
             })
           } else {
             if (!values[field.attr]) {
-              values[field.attr] = []
+              values[field.attr] = {}
             }
 
             let newField = merge({}, field)
+            delete newField['name']
             delete newField['attr']
-            values[field.attr].push(newField)
+
+            if (!values[field.attr][field.name]) {
+              values[field.attr][field.name] = {}
+            }
+
+            values[field.attr][field.name] = newField
           }
         })
 
-        this.blocks.push({
-          id: maxID + 1,
-          x: position.x,
-          y: position.y,
-          title: node.name,
+        return {
+          id: id,
+          x: this.centerX,
+          y: this.centerY,
+          name: node.name,
+          title: node.title || node.name,
           inputs: inputs,
           outputs: outputs,
           values: values
-        })
-
-        this.updateScene()
+        }
       },
       // Events
       blockSelect (block) {
-        this.selectedBlock = block
-        this.$emit('blockSelect', this.selectedBlock)
+        this.$emit('blockSelect', block)
       },
       blockDeselect (block) {
-        this.lastSelectedBlock = block
-        this.$emit('blockDeselect', this.lastSelectedBlock)
+        this.$emit('blockDeselect', block)
       },
       //
-      prepareBlocks (blocks, links) {
+      prepareBlocks (blocks) {
+        return blocks.map(block => {
+          let node = this.nodes.find(n => {
+            return n.name === block.name
+          })
+
+          if (!node) {
+            return null
+          }
+
+          let newBlock = this.createBlock(node, block.id)
+
+          newBlock = merge(newBlock, block, {
+            arrayMerge: (d, s) => {
+              return s.length === 0 ? d : s
+            }
+          })
+
+          return newBlock
+        }).filter(b => {
+          return !!b
+        })
+      },
+      prepareBlocksLinking (blocks, links) {
         if (!blocks) {
           return []
         }
@@ -467,16 +494,13 @@
         if (this.blocksContent) {
           this.nodes = merge([], this.blocksContent)
         }
-
-        // For demo
-        this.nodes.forEach(node => this.createBlock(node))
-        this.nodes.forEach(node => this.createBlock(node))
-        this.nodes.forEach(node => this.createBlock(node))
       },
       importScene () {
         let scene = merge(this.defaultScene, this.scene)
 
-        this.blocks = this.prepareBlocks(merge([], scene.blocks), scene.links)
+        let blocks = this.prepareBlocks(scene.blocks)
+        blocks = this.prepareBlocksLinking(blocks, scene.links)
+        this.blocks = blocks
         this.links = merge([], scene.links)
 
         let container = scene.container
@@ -491,8 +515,16 @@
         }
       },
       exportScene () {
+        let clonedBlocks = merge([], this.blocks)
+        let blocks = clonedBlocks.map(value => {
+          delete value['inputs']
+          delete value['outputs']
+
+          return value
+        })
+
         return {
-          blocks: this.blocks,
+          blocks: blocks,
           links: this.links,
           container: this.container
         }
