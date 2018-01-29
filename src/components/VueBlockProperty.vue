@@ -1,13 +1,25 @@
 <template>
   <div class="blocks-property">
-    {{block}}
+    <div v-for="p in properties">
+      <label :for="p.name">{{p.label}}:</label>
+      <input type="text" :value="p.value">
+    </div>
   </div>
 </template>
 
 <script>
   export default {
     name: 'VueBlockProperty',
-    props: ['block']
+    props: ['block'],
+    computed: {
+      properties () {
+        if (!this.block || !this.block.values || !this.block.values.property) {
+          return null
+        }
+
+        return this.block.values.property
+      }
+    }
   }
 </script>
 
@@ -20,6 +32,7 @@
     width: 300px;
     min-height: 200px;
 
+    background: #ffffff;
     border: 1px solid red;
 
   }

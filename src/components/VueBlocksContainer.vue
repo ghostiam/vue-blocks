@@ -9,8 +9,9 @@
               @linkingStart="linkingStart(block, $event)"
               @linkingStop="linkingStop(block, $event)"
               @linkingBreak="linkingBreak(block, $event)"
+              @select="blockSelect(block)"
+              @deselect="blockDeselect(block)"
     />
-    <VueBlockProperty :block="selectedBlock"/>
   </div>
 </template>
 
@@ -20,12 +21,10 @@
   import VueBlock from './VueBlock'
   import VueLink from './VueLink'
   import mouseHelper from '../helpers/mouse'
-  import VueBlockProperty from './VueBlockProperty'
 
   export default {
     name: 'VueBlockContainer',
     components: {
-      VueBlockProperty,
       VueBlock,
       VueLink
     },
@@ -86,13 +85,18 @@
     data () {
       return {
         dragging: false,
+        //
         centerX: 0,
         centerY: 0,
         scale: 1,
+        //
         nodes: [],
         blocks: [],
         links: [],
-        tempLink: null
+        //
+        tempLink: null,
+        lastSelectedBlock: null,
+        hasDragged: false
       }
     },
     computed: {
@@ -179,18 +183,6 @@
         }
 
         return lines
-      },
-      // Block
-      selectedBlock () {
-        let selectedBlocks = this.blocks.filter(b => {
-          return b.selected
-        })
-
-        if (selectedBlocks.length !== 1) {
-          return {}
-        }
-
-        return selectedBlocks[0]
       }
     },
     methods: {
@@ -210,6 +202,8 @@
 
           this.centerX += diffX
           this.centerY += diffY
+
+          this.hasDragged = true
         }
 
         if (this.linking && this.linkStartData) {
@@ -233,16 +227,20 @@
 
           this.lastMouseX = this.mouseX
           this.lastMouseY = this.mouseY
-        }
 
-        if (e.preventDefault) e.preventDefault()
+          if (e.preventDefault) e.preventDefault()
+        }
       },
       handleUp (e) {
         const target = e.target || e.srcElement
 
         if (this.dragging) {
           this.dragging = false
-          this.updateScene()
+
+          if (this.hasDragged) {
+            this.updateScene()
+            this.hasDragged = false
+          }
         }
 
         if (this.$el.contains(target) && (typeof target.className !== 'string' || target.className.indexOf(this.inputSlotClassName) === -1)) {
@@ -252,31 +250,34 @@
         }
       },
       handleWheel (e) {
-        if (e.preventDefault) e.preventDefault()
+        const target = e.target || e.srcElement
+        if (this.$el.contains(target)) {
+          if (e.preventDefault) e.preventDefault()
 
-        let deltaScale = Math.pow(1.1, e.deltaY * -0.01)
-        this.scale *= deltaScale
+          let deltaScale = Math.pow(1.1, e.deltaY * -0.01)
+          this.scale *= deltaScale
 
-        if (this.scale < this.minScale) {
-          this.scale = this.minScale
-          return
-        } else if (this.scale > this.maxScale) {
-          this.scale = this.maxScale
-          return
+          if (this.scale < this.minScale) {
+            this.scale = this.minScale
+            return
+          } else if (this.scale > this.maxScale) {
+            this.scale = this.maxScale
+            return
+          }
+
+          let zoomingCenter = {
+            x: this.mouseX,
+            y: this.mouseY
+          }
+
+          let deltaOffsetX = (zoomingCenter.x - this.centerX) * (deltaScale - 1)
+          let deltaOffsetY = (zoomingCenter.y - this.centerY) * (deltaScale - 1)
+
+          this.centerX -= deltaOffsetX
+          this.centerY -= deltaOffsetY
+
+          this.updateScene()
         }
-
-        let zoomingCenter = {
-          x: this.mouseX,
-          y: this.mouseY
-        }
-
-        let deltaOffsetX = (zoomingCenter.x - this.centerX) * (deltaScale - 1)
-        let deltaOffsetY = (zoomingCenter.y - this.centerY) * (deltaScale - 1)
-
-        this.centerX -= deltaOffsetX
-        this.centerY -= deltaOffsetY
-
-        this.updateScene()
       },
       // Processing
       getConnectionPos (block, slotNumber, isInput) {
@@ -314,8 +315,6 @@
       },
       // Linking
       linkingStart (block, slotNumber) {
-        this.deselectBlocks()
-
         this.linkStartData = {block: block, slotNumber: slotNumber}
         let linkStartPos = this.getConnectionPos(this.linkStartData.block, this.linkStartData.slotNumber, false)
         this.tempLink = {
@@ -387,7 +386,7 @@
 
         let inputs = []
         let outputs = []
-        let properties = []
+        let values = {}
 
         node.fields.forEach(field => {
           if (field.attr === 'input') {
@@ -400,12 +399,14 @@
               name: field.name,
               label: field.label || field.name
             })
-          } else if (field.attr === 'property') {
-            properties.push({
-              name: field.name,
-              label: field.label || field.name,
-              value: field.defaultValue || null
-            })
+          } else {
+            if (!values[field.attr]) {
+              values[field.attr] = []
+            }
+
+            let newField = merge({}, field)
+            delete newField['attr']
+            values[field.attr].push(newField)
           }
         })
 
@@ -416,16 +417,19 @@
           title: node.name,
           inputs: inputs,
           outputs: outputs,
-          properties: properties,
-          selected: false
+          values: values
         })
 
         this.updateScene()
       },
-      deselectBlocks () {
-        this.blocks.forEach(b => {
-          b.selected = false
-        })
+      // Events
+      blockSelect (block) {
+        this.selectedBlock = block
+        this.$emit('blockSelect', this.selectedBlock)
+      },
+      blockDeselect (block) {
+        this.lastSelectedBlock = block
+        this.$emit('blockDeselect', this.lastSelectedBlock)
       },
       //
       prepareBlocks (blocks, links) {

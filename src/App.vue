@@ -1,16 +1,19 @@
 <template>
   <div id="app">
-    <VueBlocksContainer :blocksContent="blocks" :scene.sync="scene" class="container"/>
+    <VueBlocksContainer :blocksContent="blocks" :scene.sync="scene" @blockSelect="selectBlock" @blockDeselect="deselectBlock" class="container"/>
+    <VueBlockProperty :block="selectedBlock"/>
   </div>
 </template>
 
 <script>
   import VueBlocksContainer from './components/VueBlocksContainer'
+  import VueBlockProperty from './components/VueBlockProperty'
 
   export default {
     name: 'App',
     components: {
-      VueBlocksContainer
+      VueBlocksContainer,
+      VueBlockProperty
     },
     data: function () {
       return {
@@ -33,8 +36,7 @@
               {
                 name: 'Stop',
                 type: 'event',
-                attr: 'input',
-                hide: true
+                attr: 'input'
               },
               {
                 name: 'onEnd',
@@ -71,7 +73,7 @@
                 label: 'Delay (s)',
                 type: 'number',
                 attr: 'property',
-                defaultValue: 1.0
+                value: 1.0
               },
               {
                 name: 'input',
@@ -86,7 +88,7 @@
             ]
           }
         ],
-        scene: {}
+        scene: {},
         /* scene: {
           blocks: [
             {
@@ -379,6 +381,16 @@
             scale: 1
           }
         } */
+        selectedBlock: null
+      }
+    },
+    methods: {
+      selectBlock (block) {
+        console.log('select', block)
+        this.selectedBlock = block
+      },
+      deselectBlock (block) {
+        console.log('deselect', block)
       }
     },
     watch: {

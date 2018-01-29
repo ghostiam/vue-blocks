@@ -43,10 +43,6 @@
       },
       inputs: Array,
       outputs: Array,
-      selected: {
-        type: Boolean,
-        default: false
-      },
 
       options: {
         type: Object
@@ -74,7 +70,9 @@
     },
     data () {
       return {
-        width: this.options.width
+        width: this.options.width,
+        selected: false,
+        hasDragged: false
       }
     },
     methods: {
@@ -90,6 +88,8 @@
           this.lastMouseY = this.mouseY
 
           this.moveWithDiff(diffX, diffY)
+
+          this.hasDragged = true
         }
       },
       handleDown (e) {
@@ -102,17 +102,27 @@
         const target = e.target || e.srcElement
         if (this.$el.contains(target)) {
           this.dragging = true
-          this.$emit('update:selected', true)
+          this.selected = true
+
+          this.$emit('select')
+
+          if (e.preventDefault) e.preventDefault()
         }
 
-        if (!this.$el.contains(target)) {
-          this.$emit('update:selected', false)
+        if (!this.$el.contains(target) && this.selected) {
+          this.selected = false
+
+          this.$emit('deselect')
         }
       },
       handleUp () {
         if (this.dragging) {
           this.dragging = false
-          this.save()
+
+          if (this.hasDragged) {
+            this.save()
+            this.hasDragged = false
+          }
         }
 
         if (this.linking) {
