@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <VueBlocksContainer :blocksContent="blocks" :scene.sync="scene" class="container"/>
-
   </div>
 </template>
 
@@ -17,21 +16,19 @@
       return {
         blocks: [
           {
-            name: 'Animation',
+            name: 'animation',
             family: 'Animations',
             description: 'Control your animation',
             fields: [
               {
                 name: 'Animation',
                 type: 'animation',
-                attr: 'property',
-                hide: false
+                attr: 'property'
               },
               {
                 name: 'Play',
                 type: 'event',
-                attr: 'input',
-                hide: false
+                attr: 'input'
               },
               {
                 name: 'Stop',
@@ -42,8 +39,7 @@
               {
                 name: 'onEnd',
                 type: 'event',
-                attr: 'output',
-                hide: false
+                attr: 'output'
               }
             ]
           },
@@ -53,7 +49,8 @@
             description: '',
             fields: [
               {
-                name: 'Message',
+                name: 'message',
+                label: 'Activation message',
                 type: 'string',
                 attr: 'property'
               },
@@ -70,7 +67,8 @@
             description: '',
             fields: [
               {
-                name: 'Delay(s)',
+                name: 'delay',
+                label: 'Delay (s)',
                 type: 'number',
                 attr: 'property',
                 defaultValue: 1.0

@@ -41,11 +41,16 @@
         type: String,
         default: 'Title'
       },
+      inputs: Array,
+      outputs: Array,
+      selected: {
+        type: Boolean,
+        default: false
+      },
+
       options: {
         type: Object
-      },
-      inputs: Array,
-      outputs: Array
+      }
     },
     created () {
       this.mouseX = 0
@@ -53,6 +58,9 @@
 
       this.lastMouseX = 0
       this.lastMouseY = 0
+
+      this.linking = false
+      this.dragging = false
     },
     mounted () {
       document.documentElement.addEventListener('mousemove', this.handleMove, true)
@@ -66,12 +74,7 @@
     },
     data () {
       return {
-        top: this.y,
-        left: this.x,
-        width: this.options.width,
-        selected: false,
-        dragging: false,
-        linking: false
+        width: this.options.width
       }
     },
     methods: {
@@ -90,20 +93,20 @@
         }
       },
       handleDown (e) {
+        this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
+        this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
+
+        this.lastMouseX = this.mouseX
+        this.lastMouseY = this.mouseY
+
         const target = e.target || e.srcElement
         if (this.$el.contains(target)) {
-          this.selected = true
           this.dragging = true
-
-          this.mouseX = e.pageX || e.clientX + document.documentElement.scrollLeft
-          this.mouseY = e.pageY || e.clientY + document.documentElement.scrollTop
-
-          this.lastMouseX = this.mouseX
-          this.lastMouseY = this.mouseY
+          this.$emit('update:selected', true)
         }
 
         if (!this.$el.contains(target)) {
-          this.selected = false
+          this.$emit('update:selected', false)
         }
       },
       handleUp () {
@@ -137,18 +140,18 @@
         this.$emit('update')
       },
       moveWithDiff (diffX, diffY) {
-        this.left += diffX / this.options.scale
-        this.top += diffY / this.options.scale
+        let left = this.x + diffX / this.options.scale
+        let top = this.y + diffY / this.options.scale
 
-        this.$emit('update:x', this.left)
-        this.$emit('update:y', this.top)
+        this.$emit('update:x', left)
+        this.$emit('update:y', top)
       }
     },
     computed: {
       style () {
         return {
-          top: this.options.center.y + this.top * this.options.scale + 'px',
-          left: this.options.center.x + this.left * this.options.scale + 'px',
+          top: this.options.center.y + this.y * this.options.scale + 'px',
+          left: this.options.center.x + this.x * this.options.scale + 'px',
           width: this.width + 'px',
           transform: 'scale(' + (this.options.scale + '') + ')',
           transformOrigin: 'top left'

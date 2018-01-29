@@ -1,12 +1,16 @@
 <template>
   <div class="vue-container">
     <VueLink :lines="lines"/>
-    <VueBlock v-for="block in blocks" :key="block.id" v-bind.sync="block" :options="optionsForChild"
+    <VueBlock v-for="block in blocks"
+              :key="block.id"
+              v-bind.sync="block"
+              :options="optionsForChild"
               @update="updateScene"
               @linkingStart="linkingStart(block, $event)"
               @linkingStop="linkingStop(block, $event)"
               @linkingBreak="linkingBreak(block, $event)"
     />
+    <VueBlockProperty :block="selectedBlock"/>
   </div>
 </template>
 
@@ -16,10 +20,15 @@
   import VueBlock from './VueBlock'
   import VueLink from './VueLink'
   import mouseHelper from '../helpers/mouse'
+  import VueBlockProperty from './VueBlockProperty'
 
   export default {
     name: 'VueBlockContainer',
-    components: {VueBlock, VueLink},
+    components: {
+      VueBlockProperty,
+      VueBlock,
+      VueLink
+    },
     props: {
       blocksContent: {
         type: Array,
@@ -170,6 +179,18 @@
         }
 
         return lines
+      },
+      // Block
+      selectedBlock () {
+        let selectedBlocks = this.blocks.filter(b => {
+          return b.selected
+        })
+
+        if (selectedBlocks.length !== 1) {
+          return {}
+        }
+
+        return selectedBlocks[0]
       }
     },
     methods: {
@@ -293,6 +314,8 @@
       },
       // Linking
       linkingStart (block, slotNumber) {
+        this.deselectBlocks()
+
         this.linkStartData = {block: block, slotNumber: slotNumber}
         let linkStartPos = this.getConnectionPos(this.linkStartData.block, this.linkStartData.slotNumber, false)
         this.tempLink = {
@@ -357,7 +380,7 @@
         this.updateScene()
       },
       // Blocks
-      addBlock (node, position = {x: 0, y: 0}) {
+      createBlock (node, position = {x: 0, y: 0}) {
         let maxID = Math.max(0, ...this.blocks.map(function (o) {
           return o.id
         }))
@@ -369,16 +392,19 @@
         node.fields.forEach(field => {
           if (field.attr === 'input') {
             inputs.push({
-              name: field.name
+              name: field.name,
+              label: field.label || field.name
             })
           } else if (field.attr === 'output') {
             outputs.push({
-              name: field.name
+              name: field.name,
+              label: field.label || field.name
             })
           } else if (field.attr === 'property') {
             properties.push({
               name: field.name,
-              value: field.defaultValue
+              label: field.label || field.name,
+              value: field.defaultValue || null
             })
           }
         })
@@ -388,12 +414,18 @@
           x: position.x,
           y: position.y,
           title: node.name,
-          values: {},
           inputs: inputs,
-          outputs: outputs
+          outputs: outputs,
+          properties: properties,
+          selected: false
         })
 
         this.updateScene()
+      },
+      deselectBlocks () {
+        this.blocks.forEach(b => {
+          b.selected = false
+        })
       },
       //
       prepareBlocks (blocks, links) {
@@ -433,9 +465,9 @@
         }
 
         // For demo
-        this.nodes.forEach(node => this.addBlock(node))
-        this.nodes.forEach(node => this.addBlock(node))
-        this.nodes.forEach(node => this.addBlock(node))
+        this.nodes.forEach(node => this.createBlock(node))
+        this.nodes.forEach(node => this.createBlock(node))
+        this.nodes.forEach(node => this.createBlock(node))
       },
       importScene () {
         let scene = merge(this.defaultScene, this.scene)
@@ -454,12 +486,15 @@
           this.scale = container.scale
         }
       },
-      updateScene () {
-        this.$emit('update:scene', {
+      exportScene () {
+        return {
           blocks: this.blocks,
           links: this.links,
           container: this.container
-        })
+        }
+      },
+      updateScene () {
+        this.$emit('update:scene', this.exportScene())
       }
     },
     watch: {
