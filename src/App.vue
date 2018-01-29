@@ -1,8 +1,12 @@
 <template>
   <div id="app">
-    <VueBlocksContainer :blocksContent="blocks" :scene.sync="scene" @blockSelect="selectBlock"
+    <VueBlocksContainer ref="container" :blocksContent="blocks" :scene.sync="scene" @blockSelect="selectBlock"
                         @blockDeselect="deselectBlock" class="container"/>
     <VueBlockProperty :property="selectedBlockProperty" @save="saveProperty"/>
+    <select name="type" v-model="selectedType">
+      <option v-for="block in blocks" :value="block.name">{{block.title || block.name}}</option>
+    </select>
+    <button @click.stop="addBlock">Add</button>
   </div>
 </template>
 
@@ -68,7 +72,8 @@
             ]
           },
           {
-            name: 'Delay',
+            name: 'delay',
+            title: 'Delay',
             family: 'Time',
             description: '',
             fields: [
@@ -86,6 +91,25 @@
               },
               {
                 name: 'output',
+                type: 'event',
+                attr: 'output'
+              }
+            ]
+          },
+          {
+            name: 'shortcuts',
+            title: 'Shortcuts',
+            family: 'Events',
+            description: 'Press shortcut for call event',
+            fields: [
+              {
+                name: 'keys',
+                label: 'Activation keys',
+                type: 'keys',
+                attr: 'property'
+              },
+              {
+                name: 'onPress',
                 type: 'event',
                 attr: 'output'
               }
@@ -128,7 +152,7 @@
               id: 3,
               x: -109,
               y: 94,
-              name: 'Delay',
+              name: 'delay',
               title: 'Delay',
               values: {
                 property: {
@@ -489,7 +513,8 @@
             scale: 1
           }
         } */
-        selectedBlock: null
+        selectedBlock: null,
+        selectedType: 'delay'
       }
     },
     computed: {
@@ -508,6 +533,10 @@
       },
       deselectBlock (block) {
         console.log('deselect', block)
+      },
+      addBlock () {
+        console.log(this.selectedType)
+        this.$refs.container.addNewBlock(this.selectedType)
       },
       saveProperty (val) {
         console.log(val)
@@ -532,7 +561,7 @@
   }
 </script>
 
-<style>
+<style lang="less">
   html, body {
     margin: 0;
     padding: 0;
@@ -549,14 +578,14 @@
   }
 
   #app {
-    width: calc(100% - 40px);
-    height: calc(100% - 40px);
+    width: ~"calc(100% - 40px)";
+    height: ~"calc(100% - 40px)";
     padding: 20px 0 0 20px;
   }
 
   .container {
     width: 100%;
-    height: 100%;
+    height: ~"calc(100% - 50px)";
     border: 1px solid black;
   }
 </style>

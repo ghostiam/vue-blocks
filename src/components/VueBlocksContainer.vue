@@ -11,6 +11,7 @@
               @linkingBreak="linkingBreak(block, $event)"
               @select="blockSelect(block)"
               @deselect="blockDeselect(block)"
+              @delete="blockDelete(block)"
     />
   </div>
 </template>
@@ -378,13 +379,24 @@
         this.updateScene()
       },
       // Blocks
-      createBlock (node, id) {
-        /*
+      addNewBlock (nodeName) {
         let maxID = Math.max(0, ...this.blocks.map(function (o) {
           return o.id
         }))
-        */
 
+        let node = this.nodes.find(n => {
+          return n.name === nodeName
+        })
+
+        if (!node) {
+          return
+        }
+        let block = this.createBlock(node, maxID + 1)
+        block.x = -this.centerX + this.$el.clientWidth / 2
+        block.y = -this.centerY + this.$el.clientHeight / 2
+        this.blocks.push(block)
+      },
+      createBlock (node, id) {
         let inputs = []
         let outputs = []
         let values = {}
@@ -419,8 +431,8 @@
 
         return {
           id: id,
-          x: this.centerX,
-          y: this.centerY,
+          x: 0,
+          y: 0,
           name: node.name,
           title: node.title || node.name,
           inputs: inputs,
@@ -434,6 +446,12 @@
       },
       blockDeselect (block) {
         this.$emit('blockDeselect', block)
+      },
+      blockDelete (block) {
+        this.blocks = this.blocks.filter(b => {
+          return b.id !== block.id
+        })
+        this.updateScene()
       },
       //
       prepareBlocks (blocks) {

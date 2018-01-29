@@ -1,6 +1,9 @@
 <template>
   <div class="vue-block" :class="{selected: selected}" :style="style">
-    <header :style="headerStyle">{{title}}</header>
+    <header :style="headerStyle">
+      {{title}}
+      <a class="delete" @click="deleteBlock">x</a>
+    </header>
     <div class="inputs">
       <div class="input" v-for="(slot, index) in inputs">
         <div class="circle inputSlot" :class="{active: slot.active}"
@@ -149,6 +152,9 @@
       save () {
         this.$emit('update')
       },
+      deleteBlock () {
+        this.$emit('delete')
+      },
       moveWithDiff (diffX, diffY) {
         let left = this.x + diffX / this.options.scale
         let top = this.y + diffY / this.options.scale
@@ -209,6 +215,12 @@
     > header {
       background: #bfbfbf;
       text-align: center;
+
+      > .delete {
+        color: red;
+        cursor: pointer;
+        float: right;
+      }
     }
 
     .inputs, .outputs {
