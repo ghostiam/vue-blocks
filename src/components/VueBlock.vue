@@ -40,6 +40,7 @@
           return typeof val === 'number'
         }
       },
+      selected: Boolean,
       title: {
         type: String,
         default: 'Title'
@@ -66,7 +67,7 @@
       document.documentElement.addEventListener('mousedown', this.handleDown, true)
       document.documentElement.addEventListener('mouseup', this.handleUp, true)
     },
-    beforeDestroy: function () {
+    beforeDestroy () {
       document.documentElement.removeEventListener('mousemove', this.handleMove, true)
       document.documentElement.removeEventListener('mousedown', this.handleDown, true)
       document.documentElement.removeEventListener('mouseup', this.handleUp, true)
@@ -74,7 +75,6 @@
     data () {
       return {
         width: this.options.width,
-        selected: false,
         hasDragged: false
       }
     },
@@ -105,17 +105,10 @@
         const target = e.target || e.srcElement
         if (this.$el.contains(target) && e.which === 1) {
           this.dragging = true
-          this.selected = true
 
           this.$emit('select')
 
           if (e.preventDefault) e.preventDefault()
-        }
-
-        if (!this.$el.contains(target) && this.selected) {
-          this.selected = false
-
-          this.$emit('deselect')
         }
       },
       handleUp () {
@@ -190,7 +183,7 @@
   @ioFontSize: 14px;
 
   @circleBorder: 1px;
-  @circleSize: 8px;
+  @circleSize: 10px;
   @circleMargin: 2px; // left/right
 
   @circleNewColor: #00FF00;
@@ -204,7 +197,6 @@
     background: white;
     z-index: 1;
     opacity: 0.9;
-
     cursor: move;
 
     &.selected {
@@ -237,12 +229,13 @@
     }
 
     .circle {
+      box-sizing: border-box;
       margin-top: @ioHeight / 2 - @circleSize / 2;
 
       width: @circleSize;
       height: @circleSize;
 
-      border: 1px solid rgba(0, 0, 0, 0.5);
+      border: @circleBorder solid rgba(0, 0, 0, 0.5);
       border-radius: 100%;
 
       cursor: crosshair;

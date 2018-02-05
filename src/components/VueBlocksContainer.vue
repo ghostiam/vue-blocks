@@ -10,7 +10,6 @@
               @linkingStop="linkingStop(block, $event)"
               @linkingBreak="linkingBreak(block, $event)"
               @select="blockSelect(block)"
-              @deselect="blockDeselect(block)"
               @delete="blockDelete(block)"
     />
   </div>
@@ -228,6 +227,7 @@
           this.lastMouseX = this.mouseX
           this.lastMouseY = this.mouseY
 
+          this.deselectAll()
           if (e.preventDefault) e.preventDefault()
         }
       },
@@ -300,8 +300,8 @@
           console.error('slot ' + slotNumber + ' not found, is input: ' + isInput, block)
         }
 
-        // (height / 2 + border + blockBorder + padding)
-        y += (16 / 2 + 1 + 1 + 2)
+        // (height / 2 + blockBorder + padding)
+        y += (16 / 2 + 1 + 2)
         //  + (height * slotNumber)
         y += (16 * slotNumber)
 
@@ -336,15 +336,17 @@
             return o.id
           }))
 
-          this.links.push({
-            id: maxID + 1,
-            originID: this.linkStartData.block.id,
-            originSlot: this.linkStartData.slotNumber,
-            targetID: targetBlock.id,
-            targetSlot: slotNumber
-          })
-
-          this.updateScene()
+          // skip if looping
+          if (this.linkStartData.block.id !== targetBlock.id) {
+            this.links.push({
+              id: maxID + 1,
+              originID: this.linkStartData.block.id,
+              originSlot: this.linkStartData.slotNumber,
+              targetID: targetBlock.id,
+              targetSlot: slotNumber
+            })
+            this.updateScene()
+          }
         }
 
         this.linking = false
@@ -376,7 +378,6 @@
         this.links = this.links.filter(value => {
           return !(value.id === linkID)
         })
-        this.updateScene()
       },
       // Blocks
       addNewBlock (nodeName) {
@@ -435,6 +436,7 @@
           id: id,
           x: 0,
           y: 0,
+          selected: false,
           name: node.name,
           title: node.title || node.name,
           inputs: inputs,
@@ -442,14 +444,29 @@
           values: values
         }
       },
+      deselectAll (withoutID = null) {
+        this.blocks.forEach((value, index) => {
+          if (value.id !== withoutID && value.selected) {
+            this.blockDeselect(value)
+          }
+        })
+      },
       // Events
       blockSelect (block) {
+        block.selected = true
+        this.deselectAll(block.id)
         this.$emit('blockSelect', block)
       },
       blockDeselect (block) {
+        block.selected = false
         this.$emit('blockDeselect', block)
       },
       blockDelete (block) {
+        this.links.forEach(l => {
+          if (l.originID === block.id || l.targetID === block.id) {
+            this.removeLink(l.id)
+          }
+        })
         this.blocks = this.blocks.filter(b => {
           return b.id !== block.id
         })
@@ -564,9 +581,10 @@
   }
 </script>
 
-<style scoped>
+<style lang="less" scoped>
   .vue-container {
     position: relative;
     overflow: hidden;
+    box-sizing: border-box;
   }
 </style>

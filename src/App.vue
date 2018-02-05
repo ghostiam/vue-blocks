@@ -1,7 +1,12 @@
 <template>
   <div id="app">
-    <VueBlocksContainer ref="container" :blocksContent="blocks" :scene.sync="scene" @blockSelect="selectBlock"
-                        @blockDeselect="deselectBlock" class="container"/>
+    <VueBlocksContainer
+      ref="container"
+      :blocksContent="blocks"
+      :scene.sync="scene"
+      @blockSelect="selectBlock"
+      @blockDeselect="deselectBlock"
+      class="container"/>
     <VueBlockProperty :property="selectedBlockProperty" @save="saveProperty"/>
     <select name="type" v-model="selectedType">
       <template v-for="type in selectBlocksType">
@@ -873,6 +878,7 @@
       },
       deselectBlock (block) {
         console.log('deselect', block)
+        this.selectedBlock = null
       },
       filteredBlocks (type) {
         return this.blocks.filter(value => {
