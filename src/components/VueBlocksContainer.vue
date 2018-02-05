@@ -17,10 +17,10 @@
 
 <script>
   import merge from 'deepmerge'
+  import mouseHelper from '../helpers/mouse'
 
   import VueBlock from './VueBlock'
   import VueLink from './VueLink'
-  import mouseHelper from '../helpers/mouse'
 
   export default {
     name: 'VueBlockContainer',
@@ -95,6 +95,7 @@
         links: [],
         //
         tempLink: null,
+        selectedBlock: null,
         hasDragged: false
       }
     },
@@ -454,11 +455,20 @@
       // Events
       blockSelect (block) {
         block.selected = true
+        this.selectedBlock = block
         this.deselectAll(block.id)
         this.$emit('blockSelect', block)
       },
       blockDeselect (block) {
         block.selected = false
+
+        if (block &&
+          this.selectedBlock &&
+          this.selectedBlock.id === block.id
+        ) {
+          this.selectedBlock = null
+        }
+
         this.$emit('blockDeselect', block)
       },
       blockDelete (block) {
@@ -540,6 +550,12 @@
 
         let blocks = this.prepareBlocks(scene.blocks)
         blocks = this.prepareBlocksLinking(blocks, scene.links)
+
+        // set last selected after update blocks from props
+        if (this.selectedBlock) {
+          blocks.find(b => this.selectedBlock.id === b.id).selected = true
+        }
+
         this.blocks = blocks
         this.links = merge([], scene.links)
 
@@ -559,6 +575,7 @@
         let blocks = clonedBlocks.map(value => {
           delete value['inputs']
           delete value['outputs']
+          delete value['selected']
 
           return value
         })
