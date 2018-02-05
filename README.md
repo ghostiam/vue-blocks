@@ -1,5 +1,9 @@
 ## Vue-Blocks
 
+### Demo
+
+[Demo](https://ghostrussia.github.io/vue-blocks/index.html)
+
 ### Basic usage
 
 ``` html
