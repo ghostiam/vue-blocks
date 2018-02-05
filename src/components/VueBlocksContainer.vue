@@ -462,6 +462,9 @@
         this.$emit('blockDeselect', block)
       },
       blockDelete (block) {
+        if (block.selected) {
+          this.blockDeselect(block)
+        }
         this.links.forEach(l => {
           if (l.originID === block.id || l.targetID === block.id) {
             this.removeLink(l.id)

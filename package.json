@@ -11,7 +11,8 @@
     "test": "npm run unit",
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src test",
     "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix src test",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "build:docs": "rimraf ./docs/* && node build/build.js && mv ./dist/* ./docs/"
   },
   "dependencies": {
     "deepmerge": "^2.0.1",
