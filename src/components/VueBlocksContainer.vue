@@ -553,7 +553,10 @@
 
         // set last selected after update blocks from props
         if (this.selectedBlock) {
-          blocks.find(b => this.selectedBlock.id === b.id).selected = true
+          let block = blocks.find(b => this.selectedBlock.id === b.id)
+          if (block) {
+            block.selected = true
+          }
         }
 
         this.blocks = blocks
