@@ -381,7 +381,7 @@
         })
       },
       // Blocks
-      addNewBlock (nodeName) {
+      addNewBlock (nodeName, x, y) {
         let maxID = Math.max(0, ...this.blocks.map(function (o) {
           return o.id
         }))
@@ -394,8 +394,18 @@
           return
         }
         let block = this.createBlock(node, maxID + 1)
-        block.x = (this.mouseX - this.centerX) / this.scale // -this.centerX + this.$el.clientWidth / 2
-        block.y = (this.mouseY - this.centerY) / this.scale // -this.centerY + this.$el.clientHeight / 2
+
+        // if x or y not set, place block to center
+        if (x === undefined || y === undefined) {
+          x = (this.$el.clientWidth / 2 - this.centerX) / this.scale
+          y = (this.$el.clientHeight / 2 - this.centerY) / this.scale
+        } else {
+          x = (x - this.centerX) / this.scale
+          y = (y - this.centerY) / this.scale
+        }
+
+        block.x = x
+        block.y = y
         this.blocks.push(block)
 
         this.updateScene()
@@ -446,7 +456,7 @@
         }
       },
       deselectAll (withoutID = null) {
-        this.blocks.forEach((value, index) => {
+        this.blocks.forEach((value) => {
           if (value.id !== withoutID && value.selected) {
             this.blockDeselect(value)
           }
@@ -526,13 +536,13 @@
           })
 
           block.inputs.forEach((s, index) => {
-            let isLinked = inputs.some(i => i.targetSlot === index)
-            block.inputs[index].active = isLinked
+            // is linked
+            block.inputs[index].active = inputs.some(i => i.targetSlot === index)
           })
 
           block.outputs.forEach((s, index) => {
-            let isLinked = outputs.some(i => i.originSlot === index)
-            block.outputs[index].active = isLinked
+            // is linked
+            block.outputs[index].active = outputs.some(i => i.originSlot === index)
           })
 
           newBlocks.push(block)
@@ -594,10 +604,10 @@
       }
     },
     watch: {
-      blocksContent (newValue, oldValue) {
+      blocksContent () {
         this.importBlocksContent()
       },
-      scene (newValue, oldValue) {
+      scene () {
         this.importScene()
       }
     }

@@ -1,6 +1,8 @@
 <template>
   <div id="app">
     <VueBlocksContainer
+      @contextmenu.native="showContextMenu"
+      @click.native="closeContextMenu"
       ref="container"
       :blocksContent="blocks"
       :scene.sync="scene"
@@ -8,14 +10,31 @@
       @blockDeselect="deselectBlock"
       class="container"/>
     <VueBlockProperty :property="selectedBlockProperty" @save="saveProperty"/>
-    <select name="type" v-model="selectedType">
-      <template v-for="type in selectBlocksType">
-        <optgroup :label="type">
-          <option v-for="block in filteredBlocks(type)" :value="block.name">{{block.title || block.name}}</option>
-        </optgroup>
-      </template>
-    </select>
+    <label>
+      <select name="type" v-model="selectedType">
+        <template v-for="type in selectBlocksType">
+          <optgroup :label="type">
+            <option v-for="block in filteredBlocks(type)" :value="block.name">{{block.title || block.name}}</option>
+          </optgroup>
+        </template>
+      </select>
+    </label>
     <button @click.stop="addBlock">Add</button>
+    |
+    <label for="useContextMenu">
+      <input type="checkbox" v-model="useContextMenu" id="useContextMenu">Use right click for Add blocks
+    </label>
+
+    <ul id="contextMenu" ref="contextMenu" tabindex="-1" v-show="contextMenu.isShow"
+        @blur="closeContextMenu"
+        :style="{top: contextMenu.top + 'px', left: contextMenu.left + 'px'}">
+      <template v-for="type in selectBlocksType">
+        <li class="label">{{type}}</li>
+        <li v-for="block in filteredBlocks(type)"
+            @click="addBlockContextMenu(block.name)">{{block.title || block.name}}
+        </li>
+      </template>
+    </ul>
   </div>
 </template>
 
@@ -24,6 +43,7 @@
 
   import VueBlocksContainer from './components/VueBlocksContainer'
   import VueBlockProperty from './components/VueBlockProperty'
+  import domHelper from './helpers/dom'
 
   export default {
     name: 'App',
@@ -559,300 +579,16 @@
             scale: 1
           }
         },
-        /* scene: {
-          blocks: [
-            {
-              id: 1,
-              x: -490,
-              y: -161,
-              title: 'test 1',
-              values: {},
-              inputs: [],
-              outputs: [
-                {
-                  name: 'out1',
-                  active: true
-                }
-              ]
-            },
-            {
-              id: 2,
-              x: 161,
-              y: -165,
-              title: 'test 2',
-              values: {},
-              inputs: [
-                {
-                  name: 'in1',
-                  active: true
-                },
-                {
-                  name: 'in2',
-                  active: true
-                },
-                {
-                  name: 'in3',
-                  active: false
-                }
-              ],
-              outputs: []
-            },
-            {
-              id: 3,
-              x: -191,
-              y: -152,
-              title: 'test 3',
-              values: {},
-              inputs: [
-                {
-                  name: 'in1',
-                  active: true
-                }
-              ],
-              outputs: [
-                {
-                  name: 'out1',
-                  active: true
-                },
-                {
-                  name: 'out2',
-                  active: false
-                }
-              ]
-            },
-            {
-              id: 4,
-              x: 441,
-              y: -152,
-              title: 'test 4',
-              values: {},
-              inputs: [
-                {
-                  name: 'in1',
-                  active: false
-                },
-                {
-                  name: 'in2',
-                  active: false
-                },
-                {
-                  name: 'in3',
-                  active: false
-                }
-              ],
-              outputs: [
-                {
-                  name: 'out1',
-                  active: false
-                },
-                {
-                  name: 'out2',
-                  active: false
-                },
-                {
-                  name: 'out3',
-                  active: false
-                }
-              ]
-            },
-            {
-              id: 7,
-              x: 40,
-              y: 325,
-              title: 'Hub',
-              values: {},
-              inputs: [
-                {
-                  name: 'input',
-                  active: true
-                }
-              ],
-              outputs: [
-                {
-                  name: 'output',
-                  active: true
-                },
-                {
-                  name: 'output',
-                  active: true
-                },
-                {
-                  name: 'output',
-                  active: false
-                }
-              ]
-            },
-            {
-              id: 8,
-              x: -195,
-              y: 133,
-              title: 'Event 1',
-              values: {},
-              inputs: [],
-              outputs: [
-                {
-                  name: 'event',
-                  active: true
-                }
-              ]
-            },
-            {
-              id: 9,
-              x: -222,
-              y: 324,
-              title: 'Event 2',
-              values: {},
-              inputs: [],
-              outputs: [
-                {
-                  name: 'event',
-                  active: true
-                }
-              ]
-            },
-            {
-              id: 10,
-              x: 187,
-              y: 104,
-              title: 'Animation 1',
-              values: {},
-              inputs: [
-                {
-                  name: 'play',
-                  active: true
-                }
-              ],
-              outputs: [
-                {
-                  name: 'end',
-                  active: false
-                }
-              ]
-            },
-            {
-              id: 11,
-              x: 185,
-              y: 179,
-              title: 'Animation 2',
-              values: {},
-              inputs: [
-                {
-                  name: 'play',
-                  active: true
-                }
-              ],
-              outputs: [
-                {
-                  name: 'end',
-                  active: false
-                }
-              ]
-            },
-            {
-              id: 12,
-              x: 350,
-              y: 295,
-              title: 'Animation 1',
-              values: {},
-              inputs: [
-                {
-                  name: 'play',
-                  active: true
-                }
-              ],
-              outputs: [
-                {
-                  name: 'end',
-                  active: false
-                }
-              ]
-            },
-            {
-              id: 13,
-              x: 351,
-              y: 361,
-              title: 'Animation 2',
-              values: {},
-              inputs: [
-                {
-                  name: 'play',
-                  active: true
-                }
-              ],
-              outputs: [
-                {
-                  name: 'end',
-                  active: false
-                }
-              ]
-            }
-          ],
-          links: [
-            {
-              id: 1,
-              originID: 1,
-              originSlot: 0,
-              targetID: 2,
-              targetSlot: 0
-            },
-            {
-              id: 2,
-              originID: 1,
-              originSlot: 0,
-              targetID: 3,
-              targetSlot: 0
-            },
-            {
-              id: 3,
-              originID: 3,
-              originSlot: 0,
-              targetID: 2,
-              targetSlot: 1
-            },
-            {
-              id: 4,
-              originID: 7,
-              originSlot: 0,
-              targetID: 12,
-              targetSlot: 0
-            },
-            {
-              id: 5,
-              originID: 7,
-              originSlot: 1,
-              targetID: 13,
-              targetSlot: 0
-            },
-            {
-              id: 6,
-              originID: 8,
-              originSlot: 0,
-              targetID: 10,
-              targetSlot: 0
-            },
-            {
-              id: 7,
-              originID: 8,
-              originSlot: 0,
-              targetID: 11,
-              targetSlot: 0
-            },
-            {
-              id: 8,
-              originID: 9,
-              originSlot: 0,
-              targetID: 7,
-              targetSlot: 0
-            }
-          ],
-          container: {
-            centerX: 771.6966211381854,
-            centerY: 206.54603325466186,
-            scale: 1
-          }
-        } */
         selectedBlock: null,
-        selectedType: 'delay'
+        selectedType: 'delay',
+        useContextMenu: true,
+        contextMenu: {
+          isShow: false,
+          mouseX: 0,
+          mouseY: 0,
+          top: 0,
+          left: 0
+        }
       }
     },
     computed: {
@@ -899,13 +635,53 @@
         block.values.property = val
 
         this.scene = merge({}, scene)
+      },
+      showContextMenu (e) {
+        if (!this.useContextMenu) return
+        if (e.preventDefault) e.preventDefault()
+
+        this.contextMenu.isShow = true
+        this.contextMenu.mouseX = e.x
+        this.contextMenu.mouseY = e.y
+
+        this.$nextTick(function () {
+          this.setMenu(e.y, e.x)
+          this.$refs.contextMenu.focus()
+        })
+      },
+      setMenu (top, left) {
+        let border = 5
+        let contextMenuEl = this.$refs.contextMenu
+        let containerElRect = this.$refs.container.$el.getBoundingClientRect()
+        let largestWidth = containerElRect.right - contextMenuEl.offsetWidth - border
+        let largestHeight = containerElRect.bottom - contextMenuEl.offsetHeight - border
+
+        console.log(this.$refs.container)
+        console.log(containerElRect)
+
+        if (left > largestWidth) left = largestWidth
+        if (top > largestHeight) top = largestHeight
+
+        this.contextMenu.top = top
+        this.contextMenu.left = left
+      },
+      addBlockContextMenu (name) {
+        let offset = domHelper.getOffsetRect(this.$refs.container.$el)
+        let x = this.contextMenu.mouseX - offset.left
+        let y = this.contextMenu.mouseY - offset.top
+
+        this.$refs.container.addNewBlock(name, x, y)
+        this.closeContextMenu()
+      },
+      closeContextMenu () {
+        this.contextMenu.isShow = false
       }
     },
     watch: {
-      blocks (newValue, oldValue) {
+      blocks (newValue) {
         console.log('blocks', JSON.stringify(newValue))
       },
-      scene (newValue, oldValue) {
+      scene (newValue) {
         console.log('scene', JSON.stringify(newValue))
       }
     }
@@ -938,5 +714,26 @@
     width: 100%;
     height: ~"calc(100% - 50px)";
     border: 1px solid black;
+  }
+
+  #contextMenu {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    border: 1px solid black;
+    padding: 5px;
+    margin: 0;
+
+    li {
+      &.label {
+        color: gray;
+        font-size: 90%;
+      }
+      list-style: none;
+    }
+
+    &:focus {
+      outline: none;
+    }
   }
 </style>
