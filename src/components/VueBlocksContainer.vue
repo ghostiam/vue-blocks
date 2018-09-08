@@ -147,6 +147,12 @@
           let originLinkPos = this.getConnectionPos(originBlock, link.originSlot, false)
           let targetLinkPos = this.getConnectionPos(targetBlock, link.targetSlot, true)
 
+          if (!originLinkPos || !targetLinkPos) {
+            console.log('Remove invalid link (slot not exist)', link)
+            this.removeLink(link.id)
+            continue
+          }
+
           let x1 = originLinkPos.x
           let y1 = originLinkPos.y
 
@@ -299,6 +305,7 @@
           x += this.optionsForChild.width
         } else {
           console.error('slot ' + slotNumber + ' not found, is input: ' + isInput, block)
+          return undefined
         }
 
         // (height / 2 + blockBorder + padding)
