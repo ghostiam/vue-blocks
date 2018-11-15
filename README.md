@@ -2,7 +2,7 @@
 
 ### Demo
 
-[Demo](https://ghostrussia.github.io/vue-blocks/index.html)
+[Demo](https://ghostiam.github.io/vue-blocks/index.html)
 
 ### Basic usage
 
