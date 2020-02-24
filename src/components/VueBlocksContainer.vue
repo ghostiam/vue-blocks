@@ -103,7 +103,7 @@
       optionsForChild () {
         return {
           width: 200,
-          titleHeight: 20,
+          titleHeight: 18,
           scale: this.scale,
           inputSlotClassName: this.inputSlotClassName,
           center: {
@@ -165,8 +165,8 @@
             x2: x2,
             y2: y2,
             style: {
-              stroke: '#F85',
-              strokeWidth: 4 * this.scale,
+              stroke: '#ccc',
+              strokeWidth: 2 * this.scale,
               fill: 'none'
             },
             outlineStyle: {
@@ -180,7 +180,7 @@
 
         if (this.tempLink) {
           this.tempLink.style = {
-            stroke: '#8f8f8f',
+            stroke: '#ccc',
             strokeWidth: 4 * this.scale,
             fill: 'none'
           }
@@ -299,6 +299,7 @@
         y += block.y
 
         y += this.optionsForChild.titleHeight
+        y += 4 // padding
 
         if (isInput && block.inputs.length > slotNumber) {
         } else if (!isInput && block.outputs.length > slotNumber) {
