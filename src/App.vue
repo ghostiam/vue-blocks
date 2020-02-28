@@ -1,14 +1,14 @@
 <template>
   <div id="app">
     <VueBlocksContainer
-      @contextmenu.native="showContextMenu"
-      @click.native="closeContextMenu"
-      ref="container"
-      :blocksContent="blocks"
-      :scene.sync="scene"
-      @blockSelect="selectBlock"
-      @blockDeselect="deselectBlock"
-      class="container"/>
+            @contextmenu.native="showContextMenu"
+            @click.native="closeContextMenu"
+            ref="container"
+            :blocksContent="blocks"
+            :scene.sync="scene"
+            @blockSelect="selectBlock"
+            @blockDeselect="deselectBlock"
+            class="container"/>
     <VueBlockProperty :property="selectedBlockProperty" @save="saveProperty"/>
     <label>
       <select name="type" v-model="selectedType">

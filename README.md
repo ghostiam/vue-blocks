@@ -211,22 +211,17 @@ Object `BlockLinks`:
 
 ``` bash
 # install dependencies
-yarn
+npm install
 
 # serve with hot reload at localhost:8080
-yarn dev
+npm run serve
 
 # build for production with minification
-yarn run build
+npm run build
 
-# build for production and view the bundle analyzer report
-yarn run build --report
+# build for github pages
+npm run build:docs
 
-# run unit tests
-yarn run unit
-
-# run all tests
-yarn test
 ```
 
 ## License
