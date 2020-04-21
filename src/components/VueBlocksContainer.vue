@@ -159,22 +159,32 @@
           let x2 = targetLinkPos.x
           let y2 = targetLinkPos.y
 
+          const style = {
+            ...{
+              stroke: '#F85',
+              strokeWidth: 4,
+              fill: 'none'
+            },
+            ...link.style
+          }
+          style.strokeWidth *= this.scale
+          const outlineStyle = {
+            ...{
+              stroke: '#666',
+              strokeWidth: 6,
+              strokeOpacity: 0.6,
+              fill: 'none'
+            },
+            ...link.outlineStyle
+          }
+          outlineStyle.strokeWidth *= this.scale
           lines.push({
             x1: x1,
             y1: y1,
             x2: x2,
             y2: y2,
-            style: {
-              stroke: '#F85',
-              strokeWidth: 4 * this.scale,
-              fill: 'none'
-            },
-            outlineStyle: {
-              stroke: '#666',
-              strokeWidth: 6 * this.scale,
-              strokeOpacity: 0.6,
-              fill: 'none'
-            }
+            style: style,
+            outlineStyle: outlineStyle
           })
         }
 

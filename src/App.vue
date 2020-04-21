@@ -458,7 +458,19 @@
               originID: 2,
               originSlot: 0,
               targetID: 4,
-              targetSlot: 0
+              targetSlot: 0,
+              style: {
+                stroke: '#F00',
+                strokeWidth: 4,
+                fill: 'none',
+                strokeDasharray: '10, 5'
+              },
+              outlineStyle: {
+                stroke: '#0F0',
+                strokeWidth: 6,
+                strokeOpacity: 0.6,
+                fill: 'none'
+              }
             },
             {
               id: 6,

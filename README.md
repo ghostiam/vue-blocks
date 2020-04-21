@@ -203,7 +203,18 @@ Object `BlockLinks`:
   originID: number, // Origin block ID
   originSlot: number, // Origin block slot number
   targetID: number, // Target block ID
-  targetSlot: number // Target block slot number
+  targetSlot: number, // Target block slot number
+  style: { // OPTIONAL svg path style
+    stroke: string, // default: '#F00'
+    strokeWidth: number, // default: 4 - multiplied by current scale
+    fill: string // default: 'none'
+  },
+  outlineStyle: { // OPTIONAL svg path outline style
+    stroke: string, // default: '#0F0'
+    strokeWidth: number, // default: 6 - multiplied by current scale
+    strokeOpacity: number, // default: 0.6
+    fill: string // default: 'none'
+  }
 }
 ```
 
