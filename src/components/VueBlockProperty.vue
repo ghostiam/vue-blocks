@@ -1,6 +1,6 @@
 <template>
   <div class="blocks-properties">
-    <div class="property" v-for="(p, index) in properties" :key="index">
+    <div class="property" v-for="(p, index) in properties" :key="'p'+index">
       <label :for="p.name">{{p.label||p.name}}:</label>
       <br>
       <input type="text" v-model="p.value">

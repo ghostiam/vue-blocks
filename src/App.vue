@@ -14,7 +14,7 @@
       <select name="type" v-model="selectedType">
         <template v-for="(type, index) in selectBlocksType">
           <optgroup :label="type" :key="index">
-            <option v-for="(block, index) in filteredBlocks(type)" :value="block.name" :key="index">{{block.title || block.name}}</option>
+            <option v-for="block in filteredBlocks(type)" :value="block.name" :key="block.id">{{block.title || block.name}}</option>
           </optgroup>
         </template>
       </select>
@@ -30,7 +30,7 @@
         :style="{top: contextMenu.top + 'px', left: contextMenu.left + 'px'}">
       <template v-for="(type, index) in selectBlocksType">
         <li class="label" :key="index">{{type}}</li>
-        <li v-for="(block, index) in filteredBlocks(type)" :key="index"
+        <li v-for="block in filteredBlocks(type)" :key="block.id"
             @click="addBlockContextMenu(block.name)">{{block.title || block.name}}
         </li>
       </template>

@@ -5,7 +5,7 @@
       <a class="delete" @click="deleteBlock">x</a>
     </header>
     <div class="inputs">
-      <div class="input" v-for="(slot, index) in inputs" :key="index">
+      <div class="input" v-for="(slot, index) in inputs" :key="'i'+index">
         <div class="circle inputSlot" :class="{active: slot.active}"
              @mouseup="slotMouseUp($event, index)"
              @mousedown="slotBreak($event, index)"></div>
@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="outputs">
-      <div class="output" v-for="(slot, index) in outputs" :key="index">
+      <div class="output" v-for="(slot, index) in outputs" :key="'o'+index">
         <div class="circle" :class="{active: slot.active}"
              @mousedown="slotMouseDown($event, index)"></div>
         {{slot.label}}

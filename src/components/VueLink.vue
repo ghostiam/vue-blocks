@@ -1,11 +1,11 @@
 <template>
   <svg width="100%" height="100%">
-    <g v-for="(p, index) in renderedPathes" :key="index">
+    <g v-for="(p, index) in renderedPathes" :key="'g'+index">
       <path v-if="outline" :d="p.data" :style="p.outlineStyle"></path>
       <path :d="p.data" :style="p.style"></path>
     </g>
     <g>
-      <path v-for="(a, index) in renderedArrows" :key="index"
+      <path v-for="(a, index) in renderedArrows" :key="'a'+index"
         d="M -1 -1 L 0 1 L 1 -1 z"
         :style="a.style"
         :transform="a.transform"></path>
