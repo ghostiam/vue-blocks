@@ -1,6 +1,6 @@
 <template>
   <div class="blocks-properties">
-    <div class="property" v-for="p in properties">
+    <div class="property" v-for="(p, index) in properties" :key="index">
       <label :for="p.name">{{p.label||p.name}}:</label>
       <br>
       <input type="text" v-model="p.value">
@@ -47,8 +47,10 @@
 
     background: #ffffff;
     border: 1px solid red;
+    /* empty ruleset..
     .property {
 
     }
+    */
   }
 </style>

@@ -12,9 +12,9 @@
     <VueBlockProperty :property="selectedBlockProperty" @save="saveProperty"/>
     <label>
       <select name="type" v-model="selectedType">
-        <template v-for="type in selectBlocksType">
-          <optgroup :label="type">
-            <option v-for="block in filteredBlocks(type)" :value="block.name">{{block.title || block.name}}</option>
+        <template v-for="(type, index) in selectBlocksType">
+          <optgroup :label="type" :key="index">
+            <option v-for="(block, index) in filteredBlocks(type)" :value="block.name" :key="index">{{block.title || block.name}}</option>
           </optgroup>
         </template>
       </select>
@@ -28,9 +28,9 @@
     <ul id="contextMenu" ref="contextMenu" tabindex="-1" v-show="contextMenu.isShow"
         @blur="closeContextMenu"
         :style="{top: contextMenu.top + 'px', left: contextMenu.left + 'px'}">
-      <template v-for="type in selectBlocksType">
-        <li class="label">{{type}}</li>
-        <li v-for="block in filteredBlocks(type)"
+      <template v-for="(type, index) in selectBlocksType">
+        <li class="label" :key="index">{{type}}</li>
+        <li v-for="(block, index) in filteredBlocks(type)" :key="index"
             @click="addBlockContextMenu(block.name)">{{block.title || block.name}}
         </li>
       </template>
