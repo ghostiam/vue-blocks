@@ -24,6 +24,9 @@
     <label for="useContextMenu">
       <input type="checkbox" v-model="useContextMenu" id="useContextMenu">Use right click for Add blocks
     </label>
+    <label for="showJSONConsole">
+      <input type="checkbox" v-model="showJSONConsole" id="showJSONConsole">Verbose log on console
+    </label>
 
     <ul id="contextMenu" ref="contextMenu" tabindex="-1" v-show="contextMenu.isShow"
         @blur="closeContextMenu"
@@ -613,6 +616,7 @@
         selectedBlock: null,
         selectedType: 'delay',
         useContextMenu: true,
+        showJSONConsole: false,
         contextMenu: {
           isShow: false,
           mouseX: 0,
@@ -640,11 +644,15 @@
     },
     methods: {
       selectBlock (block) {
-        console.log('select', block)
+        if (this.showJSONConsole) {
+          console.log('select', block)
+        }
         this.selectedBlock = block
       },
       deselectBlock (block) {
-        console.log('deselect', block)
+        if (this.showJSONConsole) {
+          console.log('deselect', block)
+        }
         this.selectedBlock = null
       },
       filteredBlocks (type) {
@@ -653,11 +661,15 @@
         })
       },
       addBlock () {
-        console.log(this.selectedType)
+        if (this.showJSONConsole) {
+          console.log(this.selectedType)
+        }
         this.$refs.container.addNewBlock(this.selectedType)
       },
       saveProperty (val) {
-        console.log(val)
+        if (this.showJSONConsole) {
+          console.log(val)
+        }
 
         let scene = this.scene
         let block = scene.blocks.find(b => {
@@ -687,8 +699,10 @@
         let largestWidth = containerElRect.right - contextMenuEl.offsetWidth - border
         let largestHeight = containerElRect.bottom - contextMenuEl.offsetHeight - border
 
-        console.log(this.$refs.container)
-        console.log(containerElRect)
+        if (this.showJSONConsole) {
+          console.log(this.$refs.container)
+          console.log(containerElRect)
+        }
 
         if (left > largestWidth) left = largestWidth
         if (top > largestHeight) top = largestHeight
@@ -710,10 +724,14 @@
     },
     watch: {
       blocks (newValue) {
-        console.log('blocks', JSON.stringify(newValue))
+        if (this.showJSONConsole) {
+          console.log('blocks', JSON.stringify(newValue, null, 2))
+        }
       },
       scene (newValue) {
-        console.log('scene', JSON.stringify(newValue))
+        if (this.showJSONConsole) {
+          console.log('scene', JSON.stringify(newValue, null, 2))
+        }
       }
     }
   }
