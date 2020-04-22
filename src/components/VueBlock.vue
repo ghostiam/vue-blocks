@@ -12,6 +12,8 @@
         {{slot.label}}
       </div>
     </div>
+    <div class="content" v-html="content">
+    </div>
     <div class="outputs" :style="outputsStyle">
       <div class="output" v-for="(slot, index) in outputs" :key="'o'+index">
         <div class="circle" :class="{active: slot.active}"
@@ -45,9 +47,12 @@
         type: String,
         default: 'Title'
       },
+      content: {
+        type: String,
+        default: ''
+      },
       inputs: Array,
       outputs: Array,
-
       options: {
         type: Object
       },
@@ -265,8 +270,19 @@
       padding: @ioPaddingInner;
 
       display: block;
-      width: 50%;
+      width: 30%;
 
+      > * {
+        width: 100%;
+      }
+    }
+
+    .content {
+      padding: @ioPaddingInner;
+      display: block;
+      width: 40%;
+      float: left;
+      text-align: center;
       > * {
         width: 100%;
       }

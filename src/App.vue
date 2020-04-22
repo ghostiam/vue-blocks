@@ -227,6 +227,7 @@
               y: -69,
               name: 'text',
               title: 'Chat message',
+              content: 'hello world<hr>this is content<hr>',
               values: {
                 property: [
                   {
@@ -239,7 +240,9 @@
                 backgroundColor: "yellow"
               },
               styleHeader: {
-                backgroundColor: "green"
+                backgroundColor: "green",
+                fontSize: '14px',
+                fontFamily: 'Arial, Verdana'
               },
               styleDelete: {
                 color: "black"
