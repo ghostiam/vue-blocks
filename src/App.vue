@@ -614,15 +614,15 @@
           },
           defaults: {
             styleBlock: {
-              backgroundColor: "orange"
+              backgroundColor: 'orange'
             },
             styleHeader: {
-              backgroundColor: "aliceblue",
+              backgroundColor: 'aliceblue',
               fontSize: '14px',
               fontFamily: 'Arial, Verdana'
             },
             styleDelete: {
-              color: "black"
+              color: 'black'
             },
             deleteMark: '',
             styleInputs: {

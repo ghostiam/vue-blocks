@@ -105,7 +105,9 @@
             ...defaults.styleHeader
           },
           styleDelete: {
-            ...{},
+            ...{
+              color: 'red'
+            },
             ...defaults.styleDelete
           },
           deleteMark: defaults.deleteMark || '✖',
@@ -150,6 +152,9 @@
       }
     },
     computed: {
+      isProduction () {
+        return process.env.NODE_ENV === "production"
+      },
       optionsForChild () {
         return {
           width: 200,
@@ -183,13 +188,17 @@
           })
 
           if (!originBlock || !targetBlock) {
-            console.log('Remove invalid link', link)
+            if (!this.isProduction) {
+              console.log('Remove invalid link', link)
+            }
             this.removeLink(link.id)
             continue
           }
 
           if (originBlock.id === targetBlock.id) {
-            console.log('Loop detected, remove link', link)
+            if (!this.isProduction) {
+              console.log('Loop detected, remove link', link)
+            }
             this.removeLink(link.id)
             continue
           }
@@ -198,7 +207,9 @@
           let targetLinkPos = this.getConnectionPos(targetBlock, link.targetSlot, true)
 
           if (!originLinkPos || !targetLinkPos) {
-            console.log('Remove invalid link (slot not exist)', link)
+            if (!this.isProduction) {
+              console.log('Remove invalid link (slot not exist)', link)
+            }
             this.removeLink(link.id)
             continue
           }
