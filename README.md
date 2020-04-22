@@ -192,6 +192,17 @@ Object `Block`:
     customAttribute: [ // show "NodeField"
       name: NodeField (without name and attr fields)
     ]
+  },
+  styleBlock: { // OPTIONAL block styles
+  },
+  styleHeader: { OPTIONAL header styles
+  },
+  styleDelete: { OPTIONAL delete button styles
+  },
+  deleteMark: 'del', OPTIONAL delete button content - default: unicode character "✖"
+  styleInputs: { OPTIONAL inputs styles
+  },
+  styleOutputs: { OPTIONAL outputs styles
   }
 }
 ```
@@ -204,12 +215,12 @@ Object `BlockLinks`:
   originSlot: number, // Origin block slot number
   targetID: number, // Target block ID
   targetSlot: number, // Target block slot number
-  style: { // OPTIONAL svg path style
+  styleLink: { // OPTIONAL svg path styles
     stroke: string, // default: '#F00'
     strokeWidth: number, // default: 4 - multiplied by current scale
     fill: string // default: 'none'
   },
-  outlineStyle: { // OPTIONAL svg path outline style
+  styleOutline: { // OPTIONAL svg path outline styles
     stroke: string, // default: '#0F0'
     strokeWidth: number, // default: 6 - multiplied by current scale
     strokeOpacity: number, // default: 0.6

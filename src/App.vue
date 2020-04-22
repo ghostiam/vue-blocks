@@ -225,7 +225,7 @@
               id: 2,
               x: -700,
               y: -69,
-              name: 'Chat message',
+              name: 'text',
               title: 'Chat message',
               values: {
                 property: [
@@ -234,6 +234,22 @@
                     type: 'string'
                   }
                 ]
+              },
+              styleBlock: {
+                backgroundColor: "yellow"
+              },
+              styleHeader: {
+                backgroundColor: "green"
+              },
+              styleDelete: {
+                color: "black"
+              },
+              deleteMark: 'del',
+              styleInputs: {
+                fontWeight: 'bolder'
+              },
+              styleOutputs: {
+                fontWeight: 'lighter'
               }
             },
             {
@@ -459,13 +475,13 @@
               originSlot: 0,
               targetID: 4,
               targetSlot: 0,
-              style: {
+              styleLink: {
                 stroke: '#F00',
                 strokeWidth: 4,
                 fill: 'none',
                 strokeDasharray: '10, 5'
               },
-              outlineStyle: {
+              styleOutline: {
                 stroke: '#0F0',
                 strokeWidth: 6,
                 strokeOpacity: 0.6,

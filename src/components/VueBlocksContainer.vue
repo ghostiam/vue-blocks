@@ -159,37 +159,37 @@
           let x2 = targetLinkPos.x
           let y2 = targetLinkPos.y
 
-          const style = {
+          const styleLink = {
             ...{
               stroke: '#F85',
               strokeWidth: 4,
               fill: 'none'
             },
-            ...link.style
+            ...link.styleLink
           }
-          style.strokeWidth *= this.scale
-          const outlineStyle = {
+          styleLink.strokeWidth *= this.scale
+          const styleOutline = {
             ...{
               stroke: '#666',
               strokeWidth: 6,
               strokeOpacity: 0.6,
               fill: 'none'
             },
-            ...link.outlineStyle
+            ...link.styleOutline
           }
-          outlineStyle.strokeWidth *= this.scale
+          styleOutline.strokeWidth *= this.scale
           lines.push({
             x1: x1,
             y1: y1,
             x2: x2,
             y2: y2,
-            style: style,
-            outlineStyle: outlineStyle
+            styleLink: styleLink,
+            styleOutline: styleOutline
           })
         }
 
         if (this.tempLink) {
-          this.tempLink.style = {
+          this.tempLink.styleLink = {
             stroke: '#8f8f8f',
             strokeWidth: 4 * this.scale,
             fill: 'none'

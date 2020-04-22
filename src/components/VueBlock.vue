@@ -2,9 +2,9 @@
   <div class="vue-block" :class="{selected: selected}" :style="style">
     <header :style="headerStyle">
       {{title}}
-      <a class="delete" @click="deleteBlock">x</a>
+      <span class="delete" @click="deleteBlock" :style="deleteStyle">{{deleteMark}}</span>
     </header>
-    <div class="inputs">
+    <div class="inputs" :style="inputsStyle">
       <div class="input" v-for="(slot, index) in inputs" :key="'i'+index">
         <div class="circle inputSlot" :class="{active: slot.active}"
              @mouseup="slotMouseUp($event, index)"
@@ -12,7 +12,7 @@
         {{slot.label}}
       </div>
     </div>
-    <div class="outputs">
+    <div class="outputs" :style="outputsStyle">
       <div class="output" v-for="(slot, index) in outputs" :key="'o'+index">
         <div class="circle" :class="{active: slot.active}"
              @mousedown="slotMouseDown($event, index)"></div>
@@ -49,6 +49,25 @@
       outputs: Array,
 
       options: {
+        type: Object
+      },
+      styleBlock: {
+        type: Object
+      },
+      styleHeader: {
+        type: Object
+      },
+      deleteMark: {
+        type: String,
+        default: '✖'
+      },
+      styleDelete: {
+        type: Object
+      },
+      styleInputs: {
+        type: Object
+      },
+      styleOutputs: {
         type: Object
       }
     },
@@ -159,16 +178,40 @@
     computed: {
       style () {
         return {
-          top: this.options.center.y + this.y * this.options.scale + 'px',
-          left: this.options.center.x + this.x * this.options.scale + 'px',
-          width: this.width + 'px',
-          transform: 'scale(' + (this.options.scale + '') + ')',
-          transformOrigin: 'top left'
+          ...{
+            top: this.options.center.y + this.y * this.options.scale + 'px',
+            left: this.options.center.x + this.x * this.options.scale + 'px',
+            width: this.width + 'px',
+            transform: 'scale(' + (this.options.scale + '') + ')',
+            transformOrigin: 'top left'
+          },
+          ...this.styleBlock
         }
       },
       headerStyle () {
         return {
-          height: this.options.titleHeight + 'px'
+          ...{
+            height: this.options.titleHeight + 'px'
+          },
+          ...this.styleHeader
+        }
+      },
+      deleteStyle () {
+        return {
+          ...{},
+          ...this.styleDelete
+        }
+      },
+      inputsStyle () {
+        return {
+          ...{},
+          ...this.styleInputs
+        }
+      },
+      outputsStyle () {
+        return {
+          ...{},
+          ...this.styleOutputs
         }
       }
     }
@@ -214,6 +257,7 @@
         float: right;
         position: absolute;
         right: 5px;
+        top: -2px;
       }
     }
 
