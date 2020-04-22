@@ -1,10 +1,11 @@
 <template>
   <div class="vue-container">
-    <VueLink :lines="lines"/>
+    <VueLink :lines="lines" />
     <VueBlock v-for="block in blocks"
               :key="block.id"
               v-bind.sync="block"
               :options="optionsForChild"
+              :defaults="defaults"
               @update="updateScene"
               @linkingStart="linkingStart(block, $event)"
               @linkingStop="linkingStop(block, $event)"
@@ -37,7 +38,7 @@
       },
       scene: {
         type: Object,
-        default: {blocks: [], links: [], container: {}}
+        default: {blocks: [], links: [], container: {}, defaults: {}}
       },
       options: {
         type: Object
@@ -83,6 +84,7 @@
       }
     },
     data () {
+      const defaults = this.scene.defaults || {}
       return {
         dragging: false,
         //
@@ -93,6 +95,54 @@
         nodes: [],
         blocks: [],
         links: [],
+        defaults: {
+          styleBlock: {
+            ...{},
+            ...defaults.styleBlock
+          },
+          styleHeader: {
+            ...{},
+            ...defaults.styleHeader
+          },
+          styleDelete: {
+            ...{},
+            ...defaults.styleDelete
+          },
+          deleteMark: defaults.deleteMark || '✖',
+          styleInputs: {
+            ...{},
+            ...defaults.styleInputs
+          },
+          styleOutputs: {
+            ...{},
+            ...defaults.styleOutputs
+          },
+          styleLink: {
+            ...{
+              stroke: '#F85',
+              strokeWidth: 4,
+              fill: 'none'
+            },
+            ...defaults.styleLink
+          },
+          styleOutline: {
+            ...{
+              stroke: '#666',
+              strokeWidth: 6,
+              strokeOpacity: 0.6,
+              fill: 'none'
+            },
+            ...defaults.styleOutline
+          },
+          styleTempLink: {
+            ...{
+              stroke: '#8f8f8f',
+              strokeWidth: 4,
+              fill: 'none'
+            },
+            ...defaults.styleTempLink
+          },
+        },
         //
         tempLink: null,
         selectedBlock: null,
@@ -160,21 +210,12 @@
           let y2 = targetLinkPos.y
 
           const styleLink = {
-            ...{
-              stroke: '#F85',
-              strokeWidth: 4,
-              fill: 'none'
-            },
+            ...this.defaults.styleLink,
             ...link.styleLink
           }
           styleLink.strokeWidth *= this.scale
           const styleOutline = {
-            ...{
-              stroke: '#666',
-              strokeWidth: 6,
-              strokeOpacity: 0.6,
-              fill: 'none'
-            },
+            ...this.defaults.styleOutline,
             ...link.styleOutline
           }
           styleOutline.strokeWidth *= this.scale
@@ -190,10 +231,9 @@
 
         if (this.tempLink) {
           this.tempLink.styleLink = {
-            stroke: '#8f8f8f',
-            strokeWidth: 4 * this.scale,
-            fill: 'none'
+            ...this.defaults.styleTempLink
           }
+          this.tempLink.styleLink.strokeWidth *= this.scale
 
           lines.push(this.tempLink)
         }

@@ -95,6 +95,43 @@
             centerX: 0,
             centerY: 0,
             scale: 1
+          },
+          defaults: { // optional
+            styleBlock: {
+              backgroundColor: "orange"
+            },
+            styleHeader: {
+              backgroundColor: "aliceblue",
+              fontSize: '14px',
+              fontFamily: 'Arial, Verdana'
+            },
+            styleDelete: {
+              color: "black"
+            },
+            deleteMark: '',
+            styleInputs: {
+              fontWeight: 'bolder'
+            },
+            styleOutputs: {
+              fontWeight: 'lighter'
+            },
+            styleLink: {
+              stroke: '#F00',
+              strokeWidth: 4,
+              fill: 'none',
+              strokeDasharray: '10, 5'
+            },
+            styleOutline: {
+              stroke: '#0F0',
+              strokeWidth: 6,
+              strokeOpacity: 0.6,
+              fill: 'none'
+            },
+            styleTempLink: {
+              stroke: '#0000ff',
+              strokeWidth: 4,
+              fill: 'none'
+            }
           }
         }
       }
@@ -163,7 +200,8 @@ Default:
 {
   blocks: [],
   links: [],
-  container: {}
+  container: {},
+  defaults: {}
 }
 ```
 
@@ -176,7 +214,8 @@ Object `Scene`:
    centerX: number
    centerY: number
    scale: number
-  }
+  },
+  defaults: Object.<Defaults>
 }
 ```
 
@@ -226,6 +265,49 @@ Object `BlockLinks`:
     strokeOpacity: number, // default: 0.6
     fill: string // default: 'none'
   }
+}
+```
+
+Object `Defaults`:
+
+Optional default styles for all objects:
+```
+{
+    styleBlock: {
+      backgroundColor: "orange"
+    },
+    styleHeader: {
+      backgroundColor: "aliceblue",
+      fontSize: '14px',
+      fontFamily: 'Arial, Verdana'
+    },
+    styleDelete: {
+      color: "black"
+    },
+    deleteMark: '',
+    styleInputs: {
+      fontWeight: 'bolder'
+    },
+    styleOutputs: {
+      fontWeight: 'lighter'
+    },
+    styleLink: {
+      stroke: '#F00',
+      strokeWidth: 4, // multiplied by current scale
+      fill: 'none',
+      strokeDasharray: '10, 5'
+    },
+    styleOutline: {
+      stroke: '#0F0',
+      strokeWidth: 6, // multiplied by current scale
+      strokeOpacity: 0.6,
+      fill: 'none'
+    },
+    styleTempLink: {
+      stroke: '#0000ff',
+      strokeWidth: 4, // multiplied by current scale
+      fill: 'none'
+    }
 }
 ```
 

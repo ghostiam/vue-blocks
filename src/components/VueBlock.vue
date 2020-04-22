@@ -2,7 +2,7 @@
   <div class="vue-block" :class="{selected: selected}" :style="style">
     <header :style="headerStyle">
       {{title}}
-      <span class="delete" @click="deleteBlock" :style="deleteStyle" v-html="deleteMark"></span>
+      <span class="delete" @click="deleteBlock" :style="deleteStyle" v-html="getDeleteMark"></span>
     </header>
     <div class="inputs" :style="inputsStyle">
       <div class="input" v-for="(slot, index) in inputs" :key="'i'+index">
@@ -64,7 +64,6 @@
       },
       deleteMark: {
         type: String,
-        default: '✖'
       },
       styleDelete: {
         type: Object
@@ -73,6 +72,9 @@
         type: Object
       },
       styleOutputs: {
+        type: Object
+      },
+      defaults: {
         type: Object
       }
     },
@@ -190,32 +192,40 @@
             transform: 'scale(' + (this.options.scale + '') + ')',
             transformOrigin: 'top left'
           },
+          ...this.defaults.styleBlock,
           ...this.styleBlock
         }
+      },
+      getDeleteMark () {
+        return this.deleteMark || this.defaults.deleteMark
       },
       headerStyle () {
         return {
           ...{
             height: this.options.titleHeight + 'px'
           },
+          ...this.defaults.styleHeader,
           ...this.styleHeader
         }
       },
       deleteStyle () {
         return {
           ...{},
+          ...this.defaults.styleDelete,
           ...this.styleDelete
         }
       },
       inputsStyle () {
         return {
           ...{},
+          ...this.defaults.styleInputs,
           ...this.styleInputs
         }
       },
       outputsStyle () {
         return {
           ...{},
+          ...this.defaults.styleOutputs,
           ...this.styleOutputs
         }
       }
@@ -234,6 +244,7 @@
   @circleSize: 10px;
   @circleMargin: 2px; // left/right
 
+  @circleColor: #FFFFFF;
   @circleNewColor: #00FF00;
   @circleRemoveColor: #FF0000;
   @circleConnectedColor: #FFFF00;
@@ -296,6 +307,7 @@
 
       border: @circleBorder solid rgba(0, 0, 0, 0.5);
       border-radius: 100%;
+      background: @circleColor;
 
       cursor: crosshair;
       &.active {

@@ -250,7 +250,7 @@
               styleDelete: {
                 color: "black"
               },
-              deleteMark: '<strong>d</strong><em>el</em>',
+              deleteMark: '<strong>D</strong><em>d</em>',
               styleInputs: {
                 fontWeight: 'bolder'
               },
@@ -611,6 +611,43 @@
             centerX: 1042,
             centerY: 140,
             scale: 1
+          },
+          defaults: {
+            styleBlock: {
+              backgroundColor: "orange"
+            },
+            styleHeader: {
+              backgroundColor: "aliceblue",
+              fontSize: '14px',
+              fontFamily: 'Arial, Verdana'
+            },
+            styleDelete: {
+              color: "black"
+            },
+            deleteMark: '',
+            styleInputs: {
+              fontWeight: 'bolder'
+            },
+            styleOutputs: {
+              fontWeight: 'lighter'
+            },
+            styleLink: {
+              stroke: '#F00',
+              strokeWidth: 4,
+              fill: 'none',
+              strokeDasharray: '10, 5'
+            },
+            styleOutline: {
+              stroke: '#0F0',
+              strokeWidth: 6,
+              strokeOpacity: 0.6,
+              fill: 'none'
+            },
+            styleTempLink: {
+              stroke: '#0000ff',
+              strokeWidth: 4,
+              fill: 'none'
+            }
           }
         },
         selectedBlock: null,
