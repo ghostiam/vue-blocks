@@ -247,7 +247,7 @@
               styleDelete: {
                 color: "black"
               },
-              deleteMark: 'del',
+              deleteMark: '<strong>d</strong><em>el</em>',
               styleInputs: {
                 fontWeight: 'bolder'
               },

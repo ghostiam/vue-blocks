@@ -47,10 +47,5 @@
 
     background: #ffffff;
     border: 1px solid red;
-    /* empty ruleset..
-    .property {
-
-    }
-    */
   }
 </style>

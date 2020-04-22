@@ -2,7 +2,7 @@
   <div class="vue-block" :class="{selected: selected}" :style="style">
     <header :style="headerStyle">
       {{title}}
-      <span class="delete" @click="deleteBlock" :style="deleteStyle">{{deleteMark}}</span>
+      <span class="delete" @click="deleteBlock" :style="deleteStyle" v-html="deleteMark"></span>
     </header>
     <div class="inputs" :style="inputsStyle">
       <div class="input" v-for="(slot, index) in inputs" :key="'i'+index">
@@ -262,7 +262,6 @@
         float: right;
         position: absolute;
         right: 5px;
-        top: -2px;
       }
     }
 
@@ -315,11 +314,6 @@
       height: @ioHeight;
       overflow: hidden;
       font-size: @ioFontSize;
-
-      /* empty ruleset..
-      &:last-child {
-      }
-      */
     }
 
     .input {
