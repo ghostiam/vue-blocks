@@ -702,6 +702,13 @@
   body {
     width: 100%;
     height: 100%;
+    background-color: rgb(39, 39, 39);
+    color: #fff;
+  }
+
+  * {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 12px;
   }
 
   #app {
@@ -719,8 +726,9 @@
   #contextMenu {
     position: absolute;
     z-index: 1000;
-    background: white;
+    background: rgb(16,16,16);
     border: 1px solid black;
+    border-radius: 5px;
     padding: 5px;
     margin: 0;
 
@@ -728,7 +736,9 @@
       &.label {
         color: gray;
         font-size: 90%;
+        cursor: default;
       }
+      cursor: pointer;
       list-style: none;
     }
 

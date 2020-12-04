@@ -149,8 +149,8 @@
         this.$emit('delete')
       },
       moveWithDiff (diffX, diffY) {
-        let left = this.x + diffX / this.options.scale
-        let top = this.y + diffY / this.options.scale
+        let left = Math.round(this.x + diffX / this.options.scale)
+        let top = Math.round(this.y + diffY / this.options.scale)
 
         this.$emit('update:x', left)
         this.$emit('update:y', top)
@@ -177,39 +177,45 @@
 
 <style lang="less" scoped>
   @blockBorder: 1px;
+  @borderRadius: 5px;
 
   @ioPaddingInner: 2px 0;
   @ioHeight: 16px;
-  @ioFontSize: 14px;
+  @ioFontSize: 12px;
 
   @circleBorder: 1px;
-  @circleSize: 10px;
-  @circleMargin: 2px; // left/right
+  @circleSize: 8px;
+  @circleMargin: 4px; // left/right
 
-  @circleNewColor: #00FF00;
-  @circleRemoveColor: #FF0000;
-  @circleConnectedColor: #FFFF00;
+  @circleNewColor: #eee;
+  @circleRemoveColor: #555;
+  @circleConnectedColor: #fff;
 
   .vue-block {
     position: absolute;
     box-sizing: border-box;
+    border-radius: @borderRadius;
     border: @blockBorder solid black;
-    background: white;
+    background: rgb(16, 16, 16);
     z-index: 1;
-    opacity: 0.9;
+    // opacity: 0.9;
     cursor: move;
 
     &.selected {
-      border: @blockBorder solid red;
+      box-shadow: 0px 0px 2px 2px rgb(234,152,7);
       z-index: 2;
     }
 
     > header {
-      background: #bfbfbf;
-      text-align: center;
+      background: rgb(52,52,52);
+      text-align: left;
+      color: white;
+      padding: 2px 8px;
+      border-top-left-radius: @borderRadius;
+      border-top-right-radius: @borderRadius;
 
       > .delete {
-        color: red;
+        color: #fff;
         cursor: pointer;
         float: right;
         position: absolute;
@@ -219,6 +225,7 @@
 
     .inputs, .outputs {
       padding: @ioPaddingInner;
+      box-sizing: border-box;
 
       display: block;
       width: 50%;
@@ -235,7 +242,7 @@
       width: @circleSize;
       height: @circleSize;
 
-      border: @circleBorder solid rgba(0, 0, 0, 0.5);
+      border: @circleBorder solid #fff;
       border-radius: 100%;
 
       cursor: crosshair;
@@ -248,13 +255,13 @@
       float: left;
       text-align: left;
 
-      margin-left: -(@circleSize/2 + @blockBorder);
+      padding-left: @circleMargin;
     }
 
     .input, .output {
       height: @ioHeight;
       overflow: hidden;
-      font-size: @ioFontSize;
+      // font-size: @ioFontSize;
 
       &:last-child {
       }
@@ -281,7 +288,7 @@
       float: right;
       text-align: right;
 
-      margin-right: -(@circleSize/2 + @blockBorder);
+      padding-right: @circleMargin;
     }
 
     .output {
