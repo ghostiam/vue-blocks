@@ -95,6 +95,43 @@
             centerX: 0,
             centerY: 0,
             scale: 1
+          },
+          defaults: { // optional
+            styleBlock: {
+              backgroundColor: "orange"
+            },
+            styleHeader: {
+              backgroundColor: "aliceblue",
+              fontSize: '14px',
+              fontFamily: 'Arial, Verdana'
+            },
+            styleDelete: {
+              color: "black"
+            },
+            deleteMark: '',
+            styleInputs: {
+              fontWeight: 'bolder'
+            },
+            styleOutputs: {
+              fontWeight: 'lighter'
+            },
+            styleLink: {
+              stroke: '#F00',
+              strokeWidth: 4,
+              fill: 'none',
+              strokeDasharray: '10, 5'
+            },
+            styleOutline: {
+              stroke: '#0F0',
+              strokeWidth: 6,
+              strokeOpacity: 0.6,
+              fill: 'none'
+            },
+            styleTempLink: {
+              stroke: '#0000ff',
+              strokeWidth: 4,
+              fill: 'none'
+            }
           }
         }
       }
@@ -163,7 +200,8 @@ Default:
 {
   blocks: [],
   links: [],
-  container: {}
+  container: {},
+  defaults: {}
 }
 ```
 
@@ -176,7 +214,8 @@ Object `Scene`:
    centerX: number
    centerY: number
    scale: number
-  }
+  },
+  defaults: Object.<Defaults>
 }
 ```
 
@@ -192,6 +231,17 @@ Object `Block`:
     customAttribute: [ // show "NodeField"
       name: NodeField (without name and attr fields)
     ]
+  },
+  styleBlock: { // OPTIONAL block styles
+  },
+  styleHeader: { OPTIONAL header styles
+  },
+  styleDelete: { OPTIONAL delete button styles
+  },
+  deleteMark: 'del', OPTIONAL delete button content - default: unicode character "✖"
+  styleInputs: { OPTIONAL inputs styles
+  },
+  styleOutputs: { OPTIONAL outputs styles
   }
 }
 ```
@@ -203,7 +253,61 @@ Object `BlockLinks`:
   originID: number, // Origin block ID
   originSlot: number, // Origin block slot number
   targetID: number, // Target block ID
-  targetSlot: number // Target block slot number
+  targetSlot: number, // Target block slot number
+  styleLink: { // OPTIONAL svg path styles
+    stroke: string, // default: '#F00'
+    strokeWidth: number, // default: 4 - multiplied by current scale
+    fill: string // default: 'none'
+  },
+  styleOutline: { // OPTIONAL svg path outline styles
+    stroke: string, // default: '#0F0'
+    strokeWidth: number, // default: 6 - multiplied by current scale
+    strokeOpacity: number, // default: 0.6
+    fill: string // default: 'none'
+  }
+}
+```
+
+Object `Defaults`:
+
+Optional default styles for all objects:
+```
+{
+    styleBlock: {
+      backgroundColor: "orange"
+    },
+    styleHeader: {
+      backgroundColor: "aliceblue",
+      fontSize: '14px',
+      fontFamily: 'Arial, Verdana'
+    },
+    styleDelete: {
+      color: "black"
+    },
+    deleteMark: '',
+    styleInputs: {
+      fontWeight: 'bolder'
+    },
+    styleOutputs: {
+      fontWeight: 'lighter'
+    },
+    styleLink: {
+      stroke: '#F00',
+      strokeWidth: 4, // multiplied by current scale
+      fill: 'none',
+      strokeDasharray: '10, 5'
+    },
+    styleOutline: {
+      stroke: '#0F0',
+      strokeWidth: 6, // multiplied by current scale
+      strokeOpacity: 0.6,
+      fill: 'none'
+    },
+    styleTempLink: {
+      stroke: '#0000ff',
+      strokeWidth: 4, // multiplied by current scale
+      fill: 'none'
+    }
 }
 ```
 

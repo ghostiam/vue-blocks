@@ -2,18 +2,20 @@
   <div class="vue-block" :class="{selected: selected}" :style="style">
     <header :style="headerStyle">
       {{title}}
-      <a class="delete" @click="deleteBlock">x</a>
+      <span class="delete" @click="deleteBlock" :style="deleteStyle" v-html="getDeleteMark"></span>
     </header>
-    <div class="inputs">
-      <div class="input" v-for="(slot, index) in inputs">
+    <div class="inputs" :style="inputsStyle">
+      <div class="input" v-for="(slot, index) in inputs" :key="'i'+index">
         <div class="circle inputSlot" :class="{active: slot.active}"
              @mouseup="slotMouseUp($event, index)"
              @mousedown="slotBreak($event, index)"></div>
         {{slot.label}}
       </div>
     </div>
-    <div class="outputs">
-      <div class="output" v-for="(slot, index) in outputs">
+    <div class="content" v-html="content">
+    </div>
+    <div class="outputs" :style="outputsStyle">
+      <div class="output" v-for="(slot, index) in outputs" :key="'o'+index">
         <div class="circle" :class="{active: slot.active}"
              @mousedown="slotMouseDown($event, index)"></div>
         {{slot.label}}
@@ -45,10 +47,34 @@
         type: String,
         default: 'Title'
       },
+      content: {
+        type: String,
+        default: ''
+      },
       inputs: Array,
       outputs: Array,
-
       options: {
+        type: Object
+      },
+      styleBlock: {
+        type: Object
+      },
+      styleHeader: {
+        type: Object
+      },
+      deleteMark: {
+        type: String,
+      },
+      styleDelete: {
+        type: Object
+      },
+      styleInputs: {
+        type: Object
+      },
+      styleOutputs: {
+        type: Object
+      },
+      defaults: {
         type: Object
       }
     },
@@ -159,16 +185,48 @@
     computed: {
       style () {
         return {
-          top: this.options.center.y + this.y * this.options.scale + 'px',
-          left: this.options.center.x + this.x * this.options.scale + 'px',
-          width: this.width + 'px',
-          transform: 'scale(' + (this.options.scale + '') + ')',
-          transformOrigin: 'top left'
+          ...{
+            top: this.options.center.y + this.y * this.options.scale + 'px',
+            left: this.options.center.x + this.x * this.options.scale + 'px',
+            width: this.width + 'px',
+            transform: 'scale(' + (this.options.scale + '') + ')',
+            transformOrigin: 'top left'
+          },
+          ...this.defaults.styleBlock,
+          ...this.styleBlock
         }
+      },
+      getDeleteMark () {
+        return this.deleteMark || this.defaults.deleteMark
       },
       headerStyle () {
         return {
-          height: this.options.titleHeight + 'px'
+          ...{
+            height: this.options.titleHeight + 'px'
+          },
+          ...this.defaults.styleHeader,
+          ...this.styleHeader
+        }
+      },
+      deleteStyle () {
+        return {
+          ...{},
+          ...this.defaults.styleDelete,
+          ...this.styleDelete
+        }
+      },
+      inputsStyle () {
+        return {
+          ...{},
+          ...this.defaults.styleInputs,
+          ...this.styleInputs
+        }
+      },
+      outputsStyle () {
+        return {
+          ...{},
+          ...this.defaults.styleOutputs,
+          ...this.styleOutputs
         }
       }
     }
@@ -186,6 +244,7 @@
   @circleSize: 10px;
   @circleMargin: 2px; // left/right
 
+  @circleColor: #FFFFFF;
   @circleNewColor: #00FF00;
   @circleRemoveColor: #FF0000;
   @circleConnectedColor: #FFFF00;
@@ -221,8 +280,19 @@
       padding: @ioPaddingInner;
 
       display: block;
-      width: 50%;
+      width: 30%;
 
+      > * {
+        width: 100%;
+      }
+    }
+
+    .content {
+      padding: @ioPaddingInner;
+      display: block;
+      width: 40%;
+      float: left;
+      text-align: center;
       > * {
         width: 100%;
       }
@@ -237,6 +307,7 @@
 
       border: @circleBorder solid rgba(0, 0, 0, 0.5);
       border-radius: 100%;
+      background: @circleColor;
 
       cursor: crosshair;
       &.active {
@@ -255,9 +326,6 @@
       height: @ioHeight;
       overflow: hidden;
       font-size: @ioFontSize;
-
-      &:last-child {
-      }
     }
 
     .input {

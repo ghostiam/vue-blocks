@@ -12,9 +12,9 @@
     <VueBlockProperty :property="selectedBlockProperty" @save="saveProperty"/>
     <label>
       <select name="type" v-model="selectedType">
-        <template v-for="type in selectBlocksType">
-          <optgroup :label="type">
-            <option v-for="block in filteredBlocks(type)" :value="block.name">{{block.title || block.name}}</option>
+        <template v-for="(type, index) in selectBlocksType">
+          <optgroup :label="type" :key="index">
+            <option v-for="block in filteredBlocks(type)" :value="block.name" :key="block.id">{{block.title || block.name}}</option>
           </optgroup>
         </template>
       </select>
@@ -24,13 +24,16 @@
     <label for="useContextMenu">
       <input type="checkbox" v-model="useContextMenu" id="useContextMenu">Use right click for Add blocks
     </label>
+    <label for="showJSONConsole">
+      <input type="checkbox" v-model="showJSONConsole" id="showJSONConsole">Verbose log on console
+    </label>
 
     <ul id="contextMenu" ref="contextMenu" tabindex="-1" v-show="contextMenu.isShow"
         @blur="closeContextMenu"
         :style="{top: contextMenu.top + 'px', left: contextMenu.left + 'px'}">
-      <template v-for="type in selectBlocksType">
-        <li class="label">{{type}}</li>
-        <li v-for="block in filteredBlocks(type)"
+      <template v-for="(type, index) in selectBlocksType">
+        <li class="label" :key="index">{{type}}</li>
+        <li v-for="block in filteredBlocks(type)" :key="block.id"
             @click="addBlockContextMenu(block.name)">{{block.title || block.name}}
         </li>
       </template>
@@ -225,8 +228,9 @@
               id: 2,
               x: -700,
               y: -69,
-              name: 'Chat message',
+              name: 'text',
               title: 'Chat message',
+              content: 'hello world<hr>this is content<hr>',
               values: {
                 property: [
                   {
@@ -234,6 +238,24 @@
                     type: 'string'
                   }
                 ]
+              },
+              styleBlock: {
+                backgroundColor: "yellow"
+              },
+              styleHeader: {
+                backgroundColor: "green",
+                fontSize: '14px',
+                fontFamily: 'Arial, Verdana'
+              },
+              styleDelete: {
+                color: "black"
+              },
+              deleteMark: '<strong>D</strong><em>d</em>',
+              styleInputs: {
+                fontWeight: 'bolder'
+              },
+              styleOutputs: {
+                fontWeight: 'lighter'
               }
             },
             {
@@ -458,7 +480,19 @@
               originID: 2,
               originSlot: 0,
               targetID: 4,
-              targetSlot: 0
+              targetSlot: 0,
+              styleLink: {
+                stroke: '#F00',
+                strokeWidth: 4,
+                fill: 'none',
+                strokeDasharray: '10, 5'
+              },
+              styleOutline: {
+                stroke: '#0F0',
+                strokeWidth: 6,
+                strokeOpacity: 0.6,
+                fill: 'none'
+              }
             },
             {
               id: 6,
@@ -577,11 +611,49 @@
             centerX: 1042,
             centerY: 140,
             scale: 1
+          },
+          defaults: {
+            styleBlock: {
+              backgroundColor: 'orange'
+            },
+            styleHeader: {
+              backgroundColor: 'aliceblue',
+              fontSize: '14px',
+              fontFamily: 'Arial, Verdana'
+            },
+            styleDelete: {
+              color: 'black'
+            },
+            deleteMark: '',
+            styleInputs: {
+              fontWeight: 'bolder'
+            },
+            styleOutputs: {
+              fontWeight: 'lighter'
+            },
+            styleLink: {
+              stroke: '#F00',
+              strokeWidth: 4,
+              fill: 'none',
+              strokeDasharray: '10, 5'
+            },
+            styleOutline: {
+              stroke: '#0F0',
+              strokeWidth: 6,
+              strokeOpacity: 0.6,
+              fill: 'none'
+            },
+            styleTempLink: {
+              stroke: '#0000ff',
+              strokeWidth: 4,
+              fill: 'none'
+            }
           }
         },
         selectedBlock: null,
         selectedType: 'delay',
         useContextMenu: true,
+        showJSONConsole: false,
         contextMenu: {
           isShow: false,
           mouseX: 0,
@@ -609,11 +681,15 @@
     },
     methods: {
       selectBlock (block) {
-        console.log('select', block)
+        if (this.showJSONConsole) {
+          console.log('select', block)
+        }
         this.selectedBlock = block
       },
       deselectBlock (block) {
-        console.log('deselect', block)
+        if (this.showJSONConsole) {
+          console.log('deselect', block)
+        }
         this.selectedBlock = null
       },
       filteredBlocks (type) {
@@ -622,11 +698,15 @@
         })
       },
       addBlock () {
-        console.log(this.selectedType)
+        if (this.showJSONConsole) {
+          console.log(this.selectedType)
+        }
         this.$refs.container.addNewBlock(this.selectedType)
       },
       saveProperty (val) {
-        console.log(val)
+        if (this.showJSONConsole) {
+          console.log(val)
+        }
 
         let scene = this.scene
         let block = scene.blocks.find(b => {
@@ -656,8 +736,10 @@
         let largestWidth = containerElRect.right - contextMenuEl.offsetWidth - border
         let largestHeight = containerElRect.bottom - contextMenuEl.offsetHeight - border
 
-        console.log(this.$refs.container)
-        console.log(containerElRect)
+        if (this.showJSONConsole) {
+          console.log(this.$refs.container)
+          console.log(containerElRect)
+        }
 
         if (left > largestWidth) left = largestWidth
         if (top > largestHeight) top = largestHeight
@@ -679,10 +761,14 @@
     },
     watch: {
       blocks (newValue) {
-        console.log('blocks', JSON.stringify(newValue))
+        if (this.showJSONConsole) {
+          console.log('blocks', JSON.stringify(newValue, null, 2))
+        }
       },
       scene (newValue) {
-        console.log('scene', JSON.stringify(newValue))
+        if (this.showJSONConsole) {
+          console.log('scene', JSON.stringify(newValue, null, 2))
+        }
       }
     }
   }

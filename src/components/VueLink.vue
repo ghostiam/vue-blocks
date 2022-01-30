@@ -1,13 +1,13 @@
 <template>
   <svg width="100%" height="100%">
-    <g v-for="p in renderedPathes" >
-      <path v-if="outline" :d="p.data" :style="p.outlineStyle"></path>
-      <path :d="p.data" :style="p.style"></path>
+    <g v-for="(p, index) in renderedPathes" :key="'g'+index">
+      <path v-if="outline" :d="p.data" :style="p.styleOutline"></path>
+      <path :d="p.data" :style="p.styleLink"></path>
     </g>
     <g>
-      <path v-for="a in renderedArrows"
+      <path v-for="(a, index) in renderedArrows" :key="'a'+index"
         d="M -1 -1 L 0 1 L 1 -1 z"
-        :style="a.style"
+        :style="a.styleArrow"
         :transform="a.transform"></path>
     </g>
   </svg>
@@ -59,8 +59,8 @@
           let dist = this.distance(l.x1, l.y1, l.x2, l.y2) * 0.25
           pathes.push({
             data: `M ${l.x1}, ${l.y1} C ${(l.x1 + dist)}, ${l.y1}, ${(l.x2 - dist)}, ${l.y2}, ${l.x2}, ${l.y2}`,
-            style: l.style,
-            outlineStyle: l.outlineStyle
+            styleLink: l.styleLink,
+            styleOutline: l.styleOutline
           })
         })
 
@@ -82,10 +82,10 @@
 
           arrows.push({
             transform: `translate(${pos.x}, ${pos.y}) rotate(${degrees})`,
-            style: {
-              stroke: l.style.stroke,
-              strokeWidth: l.style.strokeWidth * 2,
-              fill: l.style.stroke
+            styleArrow: {
+              stroke: l.styleLink.stroke,
+              strokeWidth: l.styleLink.strokeWidth * 2,
+              fill: l.styleLink.stroke
             }
           })
         })
